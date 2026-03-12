@@ -1,0 +1,33 @@
+/* 样式选择区域 */
+.style-select-area {
+  display: flex;
+  gap: 20rpx;
+}
+
+.style-select-area picker {
+  flex: 1;
+}
+
+.new-style-input {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: var(--bg-color);
+  border-radius: 12rpx;
+}
+
+.new-style-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+/* 提交区域 */
+.submit-area {
+  margin-top: 40rpx;
+  padding: 0 20rpx;
+}
+
+.submit-area .btn {
+  width: 100%;
+}

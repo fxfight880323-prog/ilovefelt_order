@@ -1,0 +1,10 @@
+{
+  "name": "getAccessToken",
+  "version": "1.0.0",
+  "description": "获取小程序 access_token（示例）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest",
+    "axios": "^1.6.0"
+  }
+}

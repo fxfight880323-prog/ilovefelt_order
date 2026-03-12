@@ -1,0 +1,123 @@
+<view class="container">
+  <!-- 手工艺人列表 -->
+  <view class="craftsman-list">
+    <view class="craftsman-card" wx:for="{{craftsmanList}}" wx:key="_id">
+      <view class="craftsman-header">
+        <view class="craftsman-info">
+          <view class="craftsman-name">{{item.name}}</view>
+          <view class="craftsman-stars">
+            <text class="star {{index < item.starLevel ? 'active' : ''}}" wx:for="{{5}}" wx:key="index">★</text>
+          </view>
+        </view>
+        <view class="tag tag-primary">{{item.specialty}}</view>
+      </view>
+      
+      <view class="craftsman-body">
+        <view class="info-row">
+          <text class="info-label">手机号：</text>
+          <text class="info-value">{{item.phone || '未设置'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">履约情况：</text>
+          <text class="info-value">{{item.performance || '良好'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">累计接单：</text>
+          <text class="info-value">{{item.totalOrders || 0}} 单</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">已完成：</text>
+          <text class="info-value text-success">{{item.completedOrders || 0}} 单</text>
+        </view>
+      </view>
+      
+      <view class="craftsman-footer">
+        <view class="btn btn-default btn-sm" bindtap="showEditModal" data-id="{{item._id}}">编辑</view>
+        <view class="btn btn-danger btn-sm ml-10" bindtap="deleteCraftsman" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && craftsmanList.length === 0}}">
+    <view class="empty-icon">👨‍🎨</view>
+    <view class="empty-text">暂无手工艺人</view>
+    <view class="empty-desc">点击右下角按钮添加新手工艺人</view>
+  </view>
+</view>
+
+<!-- 添加/编辑弹窗 -->
+<view class="modal" wx:if="{{showModal}}" bindtap="closeModal">
+  <view class="modal-content modal-lg" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">{{editingId ? '编辑手工艺人' : '添加手工艺人'}}</text>
+      <view class="modal-close" bindtap="closeModal">×</view>
+    </view>
+    <view class="modal-body">
+      <!-- 姓名 -->
+      <view class="form-item">
+        <text class="form-label required">姓名</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入姓名"
+          value="{{form.name}}"
+          bindinput="onNameInput"
+        />
+      </view>
+      
+      <!-- 手机号 -->
+      <view class="form-item">
+        <text class="form-label">手机号</text>
+        <input 
+          class="form-input" 
+          type="number"
+          placeholder="请输入手机号"
+          value="{{form.phone}}"
+          bindinput="onPhoneInput"
+          maxlength="11"
+        />
+      </view>
+      
+      <!-- 星级 -->
+      <view class="form-item">
+        <text class="form-label required">星级</text>
+        <picker mode="selector" range="{{starOptions}}" value="{{starIndex}}" bindchange="onStarChange">
+          <view class="form-picker">
+            <view class="stars">
+              <text class="star {{index < form.starLevel ? 'active' : ''}}" wx:for="{{5}}" wx:key="index">★</text>
+            </view>
+          </view>
+        </picker>
+      </view>
+      
+      <!-- 擅长方向 -->
+      <view class="form-item">
+        <text class="form-label required">擅长方向</text>
+        <picker mode="selector" range="{{specialtyOptions}}" value="{{specialtyIndex}}" bindchange="onSpecialtyChange">
+          <view class="form-picker">
+            <text wx:if="{{form.specialty}}">{{form.specialty}}</text>
+            <text wx:else style="color: #999;">请选择擅长方向</text>
+          </view>
+        </picker>
+      </view>
+      
+      <!-- 履约情况 -->
+      <view class="form-item">
+        <text class="form-label">履约情况</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入履约情况描述"
+          value="{{form.performance}}"
+          bindinput="onPerformanceInput"
+        />
+      </view>
+    </view>
+    <view class="modal-footer">
+      <view class="btn btn-default" bindtap="closeModal">取消</view>
+      <view class="btn btn-primary" bindtap="saveCraftsman">保存</view>
+    </view>
+  </view>
+</view>
+
+<!-- 添加按钮 -->
+<view class="fab" bindtap="showAddModal">+</view>

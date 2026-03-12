@@ -1,0 +1,103 @@
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx;
+}
+
+.loading-text {
+  color: var(--text-color-light);
+  font-size: 28rpx;
+}
+
+/* 状态卡片 */
+.status-card {
+  text-align: center;
+  padding: 50rpx 30rpx;
+}
+
+.status-card.status-pending {
+  background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
+  color: #ffffff;
+}
+
+.status-card.status-accepted {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  color: #ffffff;
+}
+
+.status-card.status-completed {
+  background: linear-gradient(135deg, #52c41a 0%, #95de64 100%);
+  color: #ffffff;
+}
+
+.status-card.status-cancelled {
+  background: linear-gradient(135deg, #999999 0%, #cccccc 100%);
+  color: #ffffff;
+}
+
+.status-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.status-text {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+
+.status-desc {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+/* 信息列表 */
+.info-list {
+  padding: 10rpx 0;
+}
+
+.info-list .info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.info-list .info-row:last-child {
+  border-bottom: none;
+}
+
+.info-list .info-label {
+  color: var(--text-color-secondary);
+  width: auto;
+}
+
+.info-list .info-value {
+  font-weight: 500;
+}
+
+/* 备注内容 */
+.remark-content {
+  padding: 20rpx;
+  background: var(--bg-color);
+  border-radius: 12rpx;
+  line-height: 1.8;
+  color: var(--text-color-secondary);
+}
+
+/* 操作区域 */
+.action-area {
+  margin-top: 40rpx;
+  padding: 0 20rpx 40rpx;
+}
+
+.action-area .btn {
+  width: 100%;
+  margin-bottom: 20rpx;
+}
+
+.action-area .btn:last-child {
+  margin-bottom: 0;
+}

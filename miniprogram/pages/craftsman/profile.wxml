@@ -1,0 +1,91 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="card user-card" wx:if="{{craftsmanInfo}}">
+    <view class="user-header">
+      <view class="user-avatar">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+      <view class="user-info">
+        <view class="user-name">{{craftsmanInfo.name}}</view>
+        <view class="user-stars">
+          <text class="star {{index < craftsmanInfo.starLevel ? 'active' : ''}}" wx:for="{{5}}" wx:key="index">★</text>
+        </view>
+        <view class="user-specialty">
+          <text class="tag tag-primary">{{craftsmanInfo.specialty}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="user-performance" wx:if="{{craftsmanInfo.performance}}">
+      <text class="performance-label">履约情况：</text>
+      <text class="performance-value">{{craftsmanInfo.performance}}</text>
+    </view>
+  </view>
+
+  <!-- 未注册提示 -->
+  <view class="card" wx:if="{{!craftsmanInfo}}">
+    <view class="empty-state">
+      <view class="empty-icon">📝</view>
+      <view class="empty-text">您还未注册成为手工艺人</view>
+      <view class="empty-desc">请联系管理员进行注册</view>
+      <view class="btn btn-primary mt-30" bindtap="contactAdmin">联系管理员</view>
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="card" wx:if="{{craftsmanInfo}}">
+    <view class="card-title">我的统计</view>
+    <view class="stats-grid grid grid-2">
+      <view class="stat-box">
+        <view class="stat-number">{{stats.totalOrders}}</view>
+        <view class="stat-label">累计接单</view>
+      </view>
+      <view class="stat-box">
+        <view class="stat-number">{{stats.completedOrders}}</view>
+        <view class="stat-label">已完成</view>
+      </view>
+      <view class="stat-box">
+        <view class="stat-number">{{stats.pendingOrders}}</view>
+        <view class="stat-label">进行中</view>
+      </view>
+      <view class="stat-box">
+        <view class="stat-number text-error">¥{{stats.totalIncome}}</view>
+        <view class="stat-label">累计收入</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能列表 -->
+  <view class="card menu-list" wx:if="{{craftsmanInfo}}">
+    <view class="menu-item" bindtap="updateSubscribe">
+      <view class="menu-icon">🔔</view>
+      <view class="menu-content">
+        <text class="menu-title">消息提醒</text>
+        <text class="menu-desc">订阅新订单通知</text>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    <view class="divider"></view>
+    <view class="menu-item" bindtap="contactAdmin">
+      <view class="menu-icon">📞</view>
+      <view class="menu-content">
+        <text class="menu-title">联系管理员</text>
+        <text class="menu-desc">有问题联系管理员</text>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    <view class="divider"></view>
+    <view class="menu-item" bindtap="viewHelp">
+      <view class="menu-icon">❓</view>
+      <view class="menu-content">
+        <text class="menu-title">使用帮助</text>
+        <text class="menu-desc">查看使用说明</text>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>手工艺派单系统 v1.0.0</text>
+  </view>
+</view>

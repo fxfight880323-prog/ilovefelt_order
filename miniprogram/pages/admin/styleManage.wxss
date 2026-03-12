@@ -1,0 +1,107 @@
+/* 样式列表 */
+.style-list {
+  padding-bottom: 120rpx;
+}
+
+.style-item {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.style-info {
+  flex: 1;
+}
+
+.style-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 10rpx;
+}
+
+.style-meta {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+}
+
+.style-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  padding: 12rpx 24rpx;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+}
+
+.action-btn.edit {
+  background: rgba(24, 144, 255, 0.1);
+  color: var(--primary-color);
+}
+
+.action-btn.delete {
+  background: rgba(245, 34, 45, 0.1);
+  color: var(--error-color);
+}
+
+/* 弹窗 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 80%;
+  max-width: 600rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.modal-close {
+  font-size: 40rpx;
+  color: var(--text-color-light);
+  padding: 0 10rpx;
+}
+
+.modal-body {
+  padding: 30rpx;
+}
+
+.modal-footer {
+  display: flex;
+  padding: 20rpx 30rpx 30rpx;
+  gap: 20rpx;
+}
+
+.modal-footer .btn {
+  flex: 1;
+}

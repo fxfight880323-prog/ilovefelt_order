@@ -1,0 +1,107 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="card user-card">
+    <view class="flex-between">
+      <view class="user-info">
+        <view class="user-name">{{isAdmin ? '管理员' : (craftsmanInfo ? craftsmanInfo.name : '游客')}}</view>
+        <view class="user-role">
+          <text class="tag {{isAdmin ? 'tag-primary' : 'tag-success'}}">{{isAdmin ? '管理员' : '手工艺人'}}</text>
+          <text wx:if="craftsmanInfo && craftsmanInfo.starLevel" class="stars ml-20">
+            <text class="star {{index < craftsmanInfo.starLevel ? 'active' : ''}}" wx:for="{{5}}" wx:key="index">★</text>
+          </text>
+        </view>
+      </view>
+      <view class="user-avatar">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-grid grid grid-4">
+    <view class="stat-item" bindtap="goToOrderHall">
+      <view class="stat-number text-warning">{{stats.pendingCount}}</view>
+      <view class="stat-label">待接单</view>
+    </view>
+    <view class="stat-item" bindtap="goToMyOrders">
+      <view class="stat-number text-primary">{{stats.acceptedCount}}</view>
+      <view class="stat-label">进行中</view>
+    </view>
+    <view class="stat-item" bindtap="goToMyOrders">
+      <view class="stat-number text-success">{{stats.completedCount}}</view>
+      <view class="stat-label">已完成</view>
+    </view>
+    <view class="stat-item" bindtap="{{isAdmin ? 'goToOrderManage' : 'goToMyOrders'}}">
+      <view class="stat-number">{{stats.totalCount}}</view>
+      <view class="stat-label">总订单</view>
+    </view>
+  </view>
+
+  <!-- 管理员功能 -->
+  <view class="card" wx:if="{{isAdmin}}">
+    <view class="card-title">管理员功能</view>
+    <view class="menu-grid grid grid-4">
+      <view class="menu-item" bindtap="goToCreateOrder">
+        <view class="menu-icon icon-order">📝</view>
+        <view class="menu-text">新建订单</view>
+      </view>
+      <view class="menu-item" bindtap="goToOrderManage">
+        <view class="menu-icon icon-manage">📋</view>
+        <view class="menu-text">订单管理</view>
+      </view>
+      <view class="menu-item" bindtap="goToStyleManage">
+        <view class="menu-icon icon-style">🎨</view>
+        <view class="menu-text">样式管理</view>
+      </view>
+      <view class="menu-item" bindtap="goToCraftsmanManage">
+        <view class="menu-icon icon-craftsman">👨‍🎨</view>
+        <view class="menu-text">匠人管理</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 手工艺人功能 -->
+  <view class="card" wx:if="{{!isAdmin && craftsmanInfo}}">
+    <view class="card-title">接单中心</view>
+    <view class="menu-grid grid grid-3">
+      <view class="menu-item" bindtap="goToOrderHall">
+        <view class="menu-icon icon-hall">🏪</view>
+        <view class="menu-text">接单大厅</view>
+      </view>
+      <view class="menu-item" bindtap="goToMyOrders">
+        <view class="menu-icon icon-my">📦</view>
+        <view class="menu-text">我的订单</view>
+      </view>
+      <view class="menu-item" bindtap="goToProfile">
+        <view class="menu-icon icon-profile">👤</view>
+        <view class="menu-text">个人资料</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最新公告 -->
+  <view class="card" wx:if="{{noticeList.length > 0}}">
+    <view class="card-title flex-between">
+      <text>最新公告</text>
+      <text class="text-sm text-primary">更多</text>
+    </view>
+    <view class="notice-list">
+      <view class="notice-item" wx:for="{{noticeList}}" wx:key="_id">
+        <view class="notice-dot"></view>
+        <view class="notice-content">
+          <view class="notice-title">{{item.title}}</view>
+          <view class="notice-time text-sm">{{item.createTime}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 未注册提示 -->
+  <view class="card" wx:if="{{!isAdmin && !craftsmanInfo}}">
+    <view class="empty-state">
+      <view class="empty-icon">📝</view>
+      <view class="empty-text">您还未注册成为手工艺人</view>
+      <view class="empty-desc">请联系管理员进行注册</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,110 @@
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input 
+      class="search-input" 
+      placeholder="搜索订单名称或样式"
+      value="{{keyword}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <view class="btn btn-primary btn-sm ml-20" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="status-tabs">
+    <view 
+      class="tab-item {{currentStatus === item.value ? 'active' : ''}}"
+      wx:for="{{statusOptions}}"
+      wx:key="value"
+      data-status="{{item.value}}"
+      bindtap="switchStatus"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view class="list-item order-item" wx:for="{{orderList}}" wx:key="_id">
+      <view class="list-item-header">
+        <view class="order-name">{{item.name}}</view>
+        <view class="status-tag status-{{item.status}}">
+          {{item.status === 'pending' ? '待接单' : 
+            item.status === 'accepted' ? '进行中' : 
+            item.status === 'completed' ? '已完成' : '已取消'}}
+        </view>
+      </view>
+      
+      <view class="list-item-content">
+        <view class="info-row">
+          <text class="info-label">样式：</text>
+          <text class="info-value">{{item.styleName}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">数量：</text>
+          <text class="info-value">{{item.quantity}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">单价：</text>
+          <text class="info-value text-primary text-bold">¥{{item.price}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">总价：</text>
+          <text class="info-value text-error text-bold">¥{{item.totalPrice}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">收货日期：</text>
+          <text class="info-value">{{item.receiveDate}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.craftsmanName}}">
+          <text class="info-label">接单人：</text>
+          <text class="info-value">{{item.craftsmanName}}</text>
+        </view>
+      </view>
+      
+      <view class="list-item-footer">
+        <text class="create-time">{{item.createTime}}</text>
+        <view class="action-btns">
+          <view 
+            class="btn btn-default btn-sm" 
+            bindtap="viewOrderDetail" 
+            data-id="{{item._id}}"
+          >查看</view>
+          <view 
+            class="btn btn-primary btn-sm ml-10" 
+            wx:if="{{item.status === 'pending'}}"
+            bindtap="editOrder" 
+            data-id="{{item._id}}"
+          >编辑</view>
+          <view 
+            class="btn btn-warning btn-sm ml-10" 
+            wx:if="{{item.status === 'pending' || item.status === 'accepted'}}"
+            bindtap="cancelOrder" 
+            data-id="{{item._id}}"
+          >取消</view>
+          <view 
+            class="btn btn-danger btn-sm ml-10" 
+            bindtap="deleteOrder" 
+            data-id="{{item._id}}"
+          >删除</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && orderList.length === 0}}">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">暂无订单</view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore}}">
+    {{loading ? '加载中...' : '上拉加载更多'}}
+  </view>
+</view>
+
+<!-- 新建订单按钮 -->
+<view class="fab" bindtap="createOrder">+</view>
