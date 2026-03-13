@@ -8,7 +8,7 @@
 3. 完成邮箱验证和信息登记
 4. 获取小程序 AppID
 
-### 2. 开通云开发
+### 2. 开通云开发https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html
 1. 登录小程序后台
 2. 点击左侧菜单 "云开发"
 3. 点击 "开通" 按钮
@@ -16,7 +16,7 @@
 5. 记录环境ID
 
 ### 3. 安装微信开发者工具
-1. 下载 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
+1. 下载 [微信开发者工具]()
 2. 安装并登录
 
 ## 二、导入项目
