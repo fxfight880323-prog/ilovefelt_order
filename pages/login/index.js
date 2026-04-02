@@ -137,7 +137,23 @@ Page({
   },
 
   navigateToHome(role) {
-    console.log('跳转到首页')
+    console.log('跳转到首页, role:', role)
+    
+    // 超级管理员跳转到管理后台
+    if (role === 'admin') {
+      wx.navigateTo({
+        url: '/pages/admin/console',
+        success: () => {
+          console.log('跳转到管理后台成功')
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+          wx.switchTab({ url: '/pages/common/index' })
+        }
+      })
+      return
+    }
+    
     wx.switchTab({
       url: '/pages/common/index',
       success: () => {
@@ -223,6 +239,24 @@ Page({
       app.globalData.isAdmin = roles.includes('admin')
       wx.removeStorageSync('logoutFlag')
 
+      // 超级管理员直接跳转
+      if (res.data.isSuperAdmin || roles.includes('admin')) {
+        app.globalData.userRole = 'admin'
+        app.globalData.isAdmin = true
+        wx.setStorageSync('userRole', 'admin')
+        
+        wx.showToast({
+          title: '管理员登录成功',
+          icon: 'success',
+          success: () => {
+            setTimeout(() => {
+              this.navigateToHome('admin')
+            }, 1000)
+          }
+        })
+        return
+      }
+      
       // 多角色选择
       if (roles.length > 1) {
         const roleItems = roles.map(r => {

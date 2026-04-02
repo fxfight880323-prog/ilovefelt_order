@@ -1,36 +1,20 @@
-const app = getApp()
 const API = require('../../utils/api.js')
 
 Page({
   data: {
+    isLoading: true,
     isAdmin: false,
-    activeTab: 'craftsman',
-    craftsmanList: [],
-    dispatcherList: [],
-    pendingList: [],
-    filteredPendingList: [],
-    pendingFilter: 'all',
-    pendingCraftsmanCount: 0,
-    pendingDispatcherCount: 0,
-    loading: false,
     stats: {
+      pendingCount: 0,
+      userCount: 0,
       craftsmanCount: 0,
       dispatcherCount: 0,
-      pendingCount: 0
+      orderCount: 0
     },
-    showEditModal: false,
-    editType: '',
-    editId: '',
-    editForm: {
-      name: '',
-      phone: '',
-      wechatId: '',
-      code: '',
-      starLevel: 3,
-      specialty: '',
-      performance: '中',
-      company: ''
-    }
+    pendingList: [],
+    currentTab: 'pending',
+    adminPhone: '13810062394',
+    adminPassword: '880323'
   },
 
   onLoad() {
@@ -41,249 +25,164 @@ Page({
     if (this.data.isAdmin) {
       this.loadData()
     }
-    
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 1 })
-    }
   },
 
-  onPullDownRefresh() {
-    this.loadData()
-    wx.stopPullDownRefresh()
-  },
-
-  // 检查管理员权限 - 使用新API
+  // 验证超级管理员
   async checkAdmin() {
     try {
-      const res = await API.user.getInfo()
+      const res = await API.auth.checkStatus()
       
-      if (res.data.roles.includes('admin')) {
-        this.setData({ isAdmin: true })
-        this.loadData()
-      } else {
+      if (!res.success || !res.data.isSuperAdmin) {
         wx.showModal({
-          title: '无权限',
-          content: '您不是管理员，无法访问此页面',
+          title: '无权限访问',
+          content: '只有超级管理员可以访问此页面',
           showCancel: false,
           success: () => {
-            wx.switchTab({ url: '/pages/common/index' })
+            wx.navigateBack()
           }
         })
+        return
       }
+
+      this.setData({ isAdmin: true })
+      this.loadData()
     } catch (err) {
-      console.error('检查管理员权限失败:', err)
-      wx.showModal({
-        title: '无权限',
-        content: '无法验证管理员身份',
-        showCancel: false,
-        success: () => {
-          wx.switchTab({ url: '/pages/common/index' })
-        }
-      })
+      console.error('检查权限失败:', err)
+      wx.showToast({ title: '权限检查失败', icon: 'none' })
     }
   },
 
-  goToInitDb() {
-    wx.navigateTo({ url: '/pages/admin/initDb' })
-  },
-
-  // 加载数据 - 使用新API
+  // 加载数据
   async loadData() {
-    this.setData({ loading: true })
+    this.setData({ isLoading: true })
     
     try {
-      await Promise.all([
-        this.loadPendingList(),
-        this.loadCraftsmen(),
-        this.loadStats()
-      ])
+      // 加载统计数据
+      const statsRes = await API.admin.getStats()
+      if (statsRes.success) {
+        this.setData({ stats: statsRes.data })
+      }
+
+      // 加载待审批列表
+      await this.loadPendingList()
     } catch (err) {
       console.error('加载数据失败:', err)
     } finally {
-      this.setData({ loading: false })
+      this.setData({ isLoading: false })
     }
   },
 
-  // 加载手艺人列表 - 使用新API
-  async loadCraftsmen() {
-    try {
-      const res = await API.order.getCraftsmen()
-      this.setData({ craftsmanList: res.data })
-    } catch (err) {
-      console.error('加载手艺人列表失败:', err)
-    }
-  },
-
-  // 加载待审批列表 - 使用新API
+  // 加载待审批列表
   async loadPendingList() {
     try {
       const res = await API.admin.getPendingRequests()
-      const pendingList = res.data || []
-      
-      const craftsmanList = pendingList.filter(item => item.role === 'craftsman')
-      const dispatcherList = pendingList.filter(item => item.role === 'dispatcher')
-      
-      this.setData({ 
-        pendingList,
-        pendingCraftsmanCount: craftsmanList.length,
-        pendingDispatcherCount: dispatcherList.length
-      })
-      
-      this.updateFilteredPendingList()
+      if (res.success) {
+        this.setData({ pendingList: res.data.list || [] })
+      }
     } catch (err) {
-      console.error('加载待审核列表失败:', err)
+      console.error('加载待审批列表失败:', err)
     }
   },
 
-  // 加载统计数据 - 使用新API
-  async loadStats() {
-    try {
-      const res = await API.admin.getStats()
-      this.setData({ stats: res.data })
-    } catch (err) {
-      console.error('加载统计失败:', err)
-    }
-  },
-
-  switchPendingFilter(e) {
-    const filter = e.currentTarget.dataset.filter
-    this.setData({ pendingFilter: filter }, () => {
-      this.updateFilteredPendingList()
-    })
-  },
-
-  updateFilteredPendingList() {
-    const { pendingList, pendingFilter } = this.data
-    let filteredList = pendingList
-    
-    if (pendingFilter !== 'all') {
-      filteredList = pendingList.filter(item => item.role === pendingFilter)
-    }
-    
-    this.setData({ filteredPendingList: filteredList })
-  },
-
+  // 切换标签
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab
-    this.setData({ activeTab: tab })
+    this.setData({ currentTab: tab })
+    if (tab === 'pending') {
+      this.loadPendingList()
+    }
   },
 
-  // 审核申请 - 使用新API
-  async reviewApplication(e) {
-    const { id, type, action } = e.currentTarget.dataset
-    const roleName = type === 'craftsman' ? '手艺人' : '派单人'
+  // 审批通过
+  async approve(e) {
+    const { userId, role, name } = e.currentTarget.dataset
     
     wx.showModal({
-      title: action === 'approve' ? `通过${roleName}审核` : `拒绝${roleName}审核`,
-      content: action === 'approve' ? `确定要通过该${roleName}的注册申请吗？` : '请输入拒绝原因',
-      editable: action === 'reject',
-      placeholderText: '请输入拒绝原因',
+      title: '确认通过',
+      content: `批准 ${name} 成为${role === 'craftsman' ? '手艺人' : '派单人'}？`,
       success: async (res) => {
         if (res.confirm) {
+          wx.showLoading({ title: '处理中...' })
+          
           try {
-            wx.showLoading({ title: '处理中...' })
+            const result = await API.admin.approve({
+              userId,
+              role,
+              approved: true
+            })
             
-            // 使用新API审批
-            await API.admin.approve(
-              id,
-              action === 'approve',
-              res.content || ''
-            )
-
             wx.hideLoading()
-            wx.showToast({ title: '处理成功', icon: 'success' })
-            this.loadData()
             
+            if (result.success) {
+              wx.showToast({ title: '审批通过' })
+              this.loadData()
+            } else {
+              wx.showToast({ title: result.msg || '审批失败', icon: 'none' })
+            }
           } catch (err) {
             wx.hideLoading()
-            console.error('审核失败:', err)
-            wx.showToast({ title: err.message || '处理失败', icon: 'none' })
+            wx.showToast({ title: '操作失败', icon: 'none' })
           }
         }
       }
     })
   },
 
-  reviewCraftsman(e) {
-    return this.reviewApplication(e)
-  },
-
-  viewDetail(e) {
-    const { id, type } = e.currentTarget.dataset
-    wx.navigateTo({ url: `/pages/admin/userDetail?id=${id}&type=${type}` })
-  },
-
-  onSearch(e) {
-    const keyword = e.detail.value
-    console.log('搜索:', keyword)
-    // 可以实现前端过滤
-  },
-
-  showEditModal(e) {
-    const { id, type } = e.currentTarget.dataset
-    const list = type === 'craftsman' ? this.data.craftsmanList : this.data.dispatcherList
-    const user = list.find(item => item._id === id)
+  // 拒绝申请
+  async reject(e) {
+    const { userId, role, name } = e.currentTarget.dataset
     
-    if (!user) return
-
-    this.setData({
-      showEditModal: true,
-      editType: type,
-      editId: id,
-      editForm: {
-        name: user.name || '',
-        phone: user.phone || '',
-        wechatId: user.wechatId || '',
-        code: user.code || '',
-        starLevel: user.starLevel || 3,
-        specialty: user.specialty || '',
-        performance: user.performance || '中',
-        company: user.company || ''
+    wx.showModal({
+      title: '确认拒绝',
+      content: `拒绝 ${name} 的申请？`,
+      editable: true,
+      placeholderText: '请输入拒绝原因（可选）',
+      success: async (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '处理中...' })
+          
+          try {
+            const result = await API.admin.approve({
+              userId,
+              role,
+              approved: false,
+              reason: res.content
+            })
+            
+            wx.hideLoading()
+            
+            if (result.success) {
+              wx.showToast({ title: '已拒绝' })
+              this.loadData()
+            } else {
+              wx.showToast({ title: result.msg || '操作失败', icon: 'none' })
+            }
+          } catch (err) {
+            wx.hideLoading()
+            wx.showToast({ title: '操作失败', icon: 'none' })
+          }
+        }
       }
     })
   },
 
-  closeEditModal() {
-    this.setData({ showEditModal: false })
+  // 刷新数据
+  refresh() {
+    this.loadData()
+    wx.showToast({ title: '已刷新' })
   },
 
-  preventClose() {},
-
-  onEditInput(e) {
-    const { field } = e.currentTarget.dataset
-    this.setData({ [`editForm.${field}`]: e.detail.value })
-  },
-
-  selectStar(e) {
-    const level = e.currentTarget.dataset.level
-    this.setData({ 'editForm.starLevel': level })
-  },
-
-  selectPerformance(e) {
-    const value = e.currentTarget.dataset.value
-    this.setData({ 'editForm.performance': value })
-  },
-
-  async saveEdit() {
-    const { editForm } = this.data
-
-    if (!editForm.name.trim()) {
-      wx.showToast({ title: '请输入姓名', icon: 'none' })
-      return
-    }
-
-    wx.showLoading({ title: '保存中...' })
-
-    try {
-      // 编辑功能需要先在API中添加对应接口
-      // 这里保留原有的云函数调用
-      wx.hideLoading()
-      wx.showToast({ title: '保存成功', icon: 'success' })
-      this.setData({ showEditModal: false })
-      this.loadData()
-    } catch (err) {
-      wx.hideLoading()
-      wx.showToast({ title: '保存失败', icon: 'none' })
-    }
+  // 退出登录
+  logout() {
+    wx.showModal({
+      title: '确认退出',
+      content: '确定要退出管理员账号吗？',
+      success: (res) => {
+        if (res.confirm) {
+          wx.clearStorage()
+          wx.reLaunch({ url: '/pages/login/index' })
+        }
+      }
+    })
   }
 })

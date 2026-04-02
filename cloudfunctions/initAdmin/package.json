@@ -1,0 +1,9 @@
+{
+  "name": "initAdmin",
+  "version": "1.0.0",
+  "description": "初始化管理员集合",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~3.0.0"
+  }
+}
