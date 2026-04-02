@@ -561,8 +561,13 @@ async function handleOrder(action, data, openid) {
   
   switch (action) {
     case 'create': {
-      // 只有派单人和管理员可以创建订单
-      if (!['dispatcher', 'admin'].includes(role)) {
+      // 检查权限：派单人或管理员可以创建订单
+      const userRoles = user?.roles || []
+      const isDispatcher = userRoles.includes('dispatcher') || role === 'dispatcher'
+      const isAdmin = userRoles.includes('admin') || user?.isSuperAdmin
+      
+      if (!isDispatcher && !isAdmin) {
+        console.log(`[Order Create] 权限检查失败: role=${role}, roles=${userRoles}`)
         return error('无权限创建订单', -403)
       }
       
@@ -632,8 +637,13 @@ async function handleOrder(action, data, openid) {
     }
     
     case 'accept': {
-      // 只有手艺人可以接单
-      if (role !== 'craftsman') {
+      // 检查权限：手艺人或管理员可以接单
+      const userRoles = user?.roles || []
+      const isCraftsman = userRoles.includes('craftsman') || role === 'craftsman'
+      const isAdmin = userRoles.includes('admin') || user?.isSuperAdmin
+      
+      if (!isCraftsman && !isAdmin) {
+        console.log(`[Order Accept] 权限检查失败: role=${role}, roles=${userRoles}, openid=${openid}`)
         return error('无权限接单', -403)
       }
       
@@ -661,14 +671,33 @@ async function handleOrder(action, data, openid) {
     case 'cancel': {
       const { orderId } = data
       
+      if (!orderId) {
+        return error('缺少订单ID', -400)
+      }
+      
       const { data: orders } = await db.collection('orders').where({ _id: orderId }).get()
-      if (orders.length === 0) return error('订单不存在')
+      if (orders.length === 0) return error('订单不存在', -404)
       
       const order = orders[0]
       
-      // 验证权限：派单人或接单的手艺人可以取消
-      if (order.dispatcherId !== openid && order.craftsmanId !== openid && role !== 'admin') {
-        return error('无权限取消订单', -403)
+      // 验证权限：派单人、接单的手艺人或管理员可以取消
+      const userRoles = user?.roles || []
+      const isAdmin = userRoles.includes('admin') || user?.isSuperAdmin
+      const isOwner = order.dispatcherId === openid || order.craftsmanId === openid
+      
+      console.log(`[Order Cancel] 权限检查: order.dispatcherId=${order.dispatcherId}, order.craftsmanId=${order.craftsmanId}, openid=${openid}, isOwner=${isOwner}, isAdmin=${isAdmin}`)
+      
+      if (!isOwner && !isAdmin) {
+        return error(`无权限取消订单: 您不是订单创建者或接单者`, -403)
+      }
+      
+      // 检查订单状态是否允许取消
+      if (order.status === 'cancelled') {
+        return error('订单已取消，无需重复操作', -400)
+      }
+      
+      if (order.status === 'completed') {
+        return error('已完成订单不能取消', -400)
       }
       
       await db.collection('orders').doc(orderId).update({
@@ -680,7 +709,7 @@ async function handleOrder(action, data, openid) {
         }
       })
       
-      return success(null, '订单已取消')
+      return success({ orderId, status: 'cancelled' }, '订单已取消')
     }
     
     case 'complete': {
@@ -691,8 +720,13 @@ async function handleOrder(action, data, openid) {
       
       const order = orders[0]
       
-      // 验证权限
-      if (order.craftsmanId !== openid && order.dispatcherId !== openid && role !== 'admin') {
+      // 验证权限：接单的手艺人、派单人或管理员可以完成
+      const userRoles = user?.roles || []
+      const isAdmin = userRoles.includes('admin') || user?.isSuperAdmin
+      const isOwner = order.dispatcherId === openid || order.craftsmanId === openid
+      
+      if (!isOwner && !isAdmin) {
+        console.log(`[Order Complete] 权限检查失败: order.dispatcherId=${order.dispatcherId}, order.craftsmanId=${order.craftsmanId}, openid=${openid}`)
         return error('无权限完成订单', -403)
       }
       
