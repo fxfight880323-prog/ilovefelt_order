@@ -17,6 +17,25 @@ function encryptPassword(password) {
   return crypto.createHash('md5').update(password).digest('hex')
 }
 
+// 验证密码（支持明文和加密）
+function verifyPassword(inputPassword, storedPassword) {
+  console.log('[Password Verify] 输入:', inputPassword, '存储:', storedPassword)
+  // 如果存储的是明文，直接比较
+  if (inputPassword === storedPassword) {
+    console.log('[Password Verify] 明文匹配成功')
+    return true
+  }
+  // 如果存储的是MD5加密，比较加密后的值
+  const encrypted = encryptPassword(inputPassword)
+  console.log('[Password Verify] MD5:', encrypted)
+  if (encrypted === storedPassword) {
+    console.log('[Password Verify] MD5匹配成功')
+    return true
+  }
+  console.log('[Password Verify] 匹配失败')
+  return false
+}
+
 // 生成订单号
 function generateOrderNo() {
   return 'DD' + Date.now().toString().slice(-10) + Math.random().toString(36).substr(2, 3).toUpperCase()
@@ -198,22 +217,31 @@ async function handleAuth(action, data, openid) {
     case 'loginByPhone': {
       const { phone, password } = data
       
+      console.log('[Login] phone:', phone, 'password:', password)
+      
       if (!phone || !password) {
         return error('请输入手机号和密码', -1001)
       }
       
-      const { data: users } = await db.collection('users').where({
-        phone,
-        password: encryptPassword(password)
-      }).get()
+      // 先查找用户
+      const { data: users } = await db.collection('users').where({ phone }).get()
+      
+      console.log('[Login] 找到用户:', users.length)
       
       if (users.length === 0) {
-        return error('账号或密码错误', -1003)
+        return error('账号不存在', -1003)
       }
       
       const user = users[0]
+      console.log('[Login] 用户密码:', user.password)
       
-      // 更新openid
+      // 验证密码（支持明文和加密）
+      if (!verifyPassword(password, user.password)) {
+        console.log('[Login] 密码验证失败')
+        return error('账号或密码错误', -1003)
+      }
+      
+      console.log('[Login] 密码验证成功')
       if (!user.openid) {
         await db.collection('users').doc(user._id).update({ data: { openid } })
       }
@@ -389,11 +417,19 @@ async function handleOrder(action, data, openid) {
         dispatcherPhone: user?.phone,
         craftsmanId: null,
         craftsmanName: null,
+        craftsmanPhone: null,
+        // 完成信息
+        trackingNo: null,           // 快递单号
+        completionPhotos: [],       // 完成照片
+        completionNote: '',         // 完成备注
+        // 时间戳
         createTime: new Date(),
         updateTime: new Date(),
         acceptTime: null,
         completeTime: null,
-        cancelTime: null
+        cancelTime: null,
+        cancelBy: null,
+        cancelReason: ''
       }
       
       const result = await db.collection('orders').add({ data: orderData })
@@ -477,7 +513,7 @@ async function handleOrder(action, data, openid) {
     }
     
     case 'complete': {
-      const { orderId } = data
+      const { orderId, trackingNo, photos, completionNote } = data
       
       const { data: orders } = await db.collection('orders').where({ _id: orderId }).get()
       if (orders.length === 0) return error('订单不存在')
@@ -489,15 +525,34 @@ async function handleOrder(action, data, openid) {
         return error('无权限完成订单', -403)
       }
       
-      await db.collection('orders').doc(orderId).update({
-        data: {
-          status: 'completed',
-          completeTime: new Date(),
-          updateTime: new Date()
-        }
-      })
+      const updateData = {
+        status: 'completed',
+        completeTime: new Date(),
+        updateTime: new Date()
+      }
       
-      return success(null, '订单已完成')
+      // 添加快递单号
+      if (trackingNo) {
+        updateData.trackingNo = trackingNo
+      }
+      
+      // 添加完成照片
+      if (photos && photos.length > 0) {
+        updateData.completionPhotos = photos
+      }
+      
+      // 添加完成备注
+      if (completionNote) {
+        updateData.completionNote = completionNote
+      }
+      
+      await db.collection('orders').doc(orderId).update({ data: updateData })
+      
+      return success({ 
+        orderId,
+        trackingNo,
+        completeTime: new Date()
+      }, '订单已完成')
     }
     
     default:

@@ -9,7 +9,7 @@ const API = {
     try {
       const res = await wx.cloud.callFunction({
         name: 'api',
-        data: { module, action, data }
+        data: { module, action, ...data }
       })
       
       const result = res.result
@@ -105,8 +105,13 @@ const API = {
     },
 
     // 完成订单
-    async complete(orderId, photos = []) {
-      return await API.call('order', 'complete', { orderId, photos })
+    async complete(orderId, data = {}) {
+      return await API.call('order', 'complete', { 
+        orderId, 
+        trackingNo: data.trackingNo,
+        photos: data.photos,
+        completionNote: data.completionNote
+      })
     },
 
     // 获取手艺人列表（用于派单）
