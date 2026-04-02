@@ -1,0 +1,78 @@
+<view class="container canvas-bg">
+  <!-- Header -->
+  <view class="section-header" style="padding-top: 20rpx;">
+    <view>
+      <view class="headline-md">任务台</view>
+      <view class="body-sm text-on-surface-variant" style="margin-top: 8rpx;">匠心独运，始于足下</view>
+    </view>
+  </view>
+
+  <!-- 订阅消息功能已取消 -->
+
+  <!-- Order List -->
+  <view class="list" style="gap: 24rpx;">
+    <view class="card card-elevated order-card" wx:for="{{orderList}}" wx:key="_id">
+      <!-- Order Header -->
+      <view style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24rpx;">
+        <view>
+          <view class="title-md" style="margin-bottom: 8rpx;">{{item.name}}</view>
+          <view class="chip chip-primary" style="font-size: 20rpx;">{{item.styleName}}</view>
+        </view>
+        <view class="status-tag status-pending">待接单</view>
+      </view>
+      
+      <!-- Order Body -->
+      <view bindtap="viewDetail" data-id="{{item._id}}" style="margin-bottom: 24rpx;">
+        <!-- Info Grid -->
+        <view style="display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; margin-bottom: 20rpx;">
+          <view class="info-item">
+            <view class="label-sm" style="margin-bottom: 4rpx;">数量</view>
+            <view class="title-sm">{{item.quantity}} 件</view>
+          </view>
+          <view class="info-item">
+            <view class="label-sm" style="margin-bottom: 4rpx;">单价</view>
+            <view class="title-sm text-primary">¥{{item.price}}</view>
+          </view>
+        </view>
+        
+        <view class="info-item" style="background: var(--surface-container); padding: 16rpx; border-radius: 12rpx; margin-bottom: 16rpx;">
+          <view class="label-sm" style="margin-bottom: 4rpx;">总价</view>
+          <view class="headline-sm text-primary">¥{{item.totalPrice}}</view>
+        </view>
+        
+        <view class="info-item">
+          <view class="label-sm" style="margin-bottom: 4rpx;">收货日期</view>
+          <view class="body-md">{{item.receiveDate}}</view>
+        </view>
+        
+        <view class="info-item" wx:if="{{item.remark}}" style="margin-top: 16rpx;">
+          <view class="label-sm" style="margin-bottom: 4rpx;">备注</view>
+          <view class="body-sm text-on-surface-variant" style="font-style: italic;">{{item.remark}}</view>
+        </view>
+      </view>
+      
+      <!-- Order Footer -->
+      <view style="display: flex; justify-content: space-between; align-items: center; padding-top: 20rpx; border-top: 2rpx solid var(--outline-variant); border-top-opacity: 0.15;">
+        <view style="font-size: 24rpx; color: var(--outline);">发布于 {{item.createTime}}</view>
+        <view class="btn btn-primary" bindtap="takeOrder" data-id="{{item._id}}">立即接单</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty State -->
+  <view class="empty-state" wx:if="{{!loading && orderList.length === 0}}">
+    <view style="width: 160rpx; height: 160rpx; background: var(--surface-container); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 32rpx;">
+      <text style="font-size: 80rpx; opacity: 0.6;">📭</text>
+    </view>
+    <view class="empty-text">暂无可接订单</view>
+    <view class="empty-desc">请稍后再来看看</view>
+  </view>
+
+  <!-- Load More -->
+  <view wx:if="{{hasMore}}" style="text-align: center; padding: 40rpx; color: var(--on-surface-variant); font-size: 26rpx;">
+    {{loading ? '加载中...' : '上拉加载更多'}}
+  </view>
+
+  <!-- Bottom Spacer -->
+  <view style="height: 40rpx;"></view>
+</view>

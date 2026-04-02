@@ -1,0 +1,99 @@
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="title">订单跟踪</view>
+    <view class="order-code">#{{orderInfo.orderCode || orderInfo._id}}</view>
+  </view>
+
+  <!-- Order Info Card -->
+  <view class="card">
+    <view class="card-title">订单信息</view>
+    <view class="info-list">
+      <view class="info-item">
+        <text class="label">订单名称</text>
+        <text class="value">{{orderInfo.name}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">当前状态</text>
+        <text class="value status-{{orderInfo.status}}">
+          {{orderInfo.status === 'accepted' ? '进行中' : orderInfo.status === 'shipped' ? '已发货' : '已完成'}}
+        </text>
+      </view>
+      <view class="info-item" wx:if="{{orderInfo.craftsmanName}}">
+        <text class="label">手艺人</text>
+        <text class="value">{{orderInfo.craftsmanName}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Timeline -->
+  <view class="card">
+    <view class="card-title">订单进度</view>
+    <view class="timeline">
+      <!-- 接单 -->
+      <view class="timeline-item {{orderInfo.status !== 'pending' ? 'completed' : ''}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-title">订单已接单</view>
+          <view class="timeline-time" wx:if="{{orderInfo.acceptDate}}">{{orderInfo.acceptDate}}</view>
+          <view class="timeline-desc" wx:if="{{orderInfo.craftsmanName}}">
+            手艺人 {{orderInfo.craftsmanName}} 已接单
+          </view>
+        </view>
+      </view>
+
+      <!-- 发货 -->
+      <view class="timeline-item {{orderInfo.status === 'shipped' || orderInfo.status === 'completed' ? 'completed' : ''}} {{orderInfo.status === 'accepted' ? 'current' : ''}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-title">订单发货</view>
+          <view class="timeline-time" wx:if="{{orderInfo.shipDate}}">{{orderInfo.shipDate}}</view>
+          <view class="timeline-desc" wx:if="{{orderInfo.trackingNumber}}">
+            运单号：{{orderInfo.trackingNumber}}
+          </view>
+          <view class="timeline-desc" wx:if="{{orderInfo.trackingCompany}}">
+            物流公司：{{orderInfo.trackingCompany}}
+          </view>
+        </view>
+      </view>
+
+      <!-- 完成 -->
+      <view class="timeline-item {{orderInfo.status === 'completed' ? 'completed' : ''}} {{orderInfo.status === 'shipped' ? 'current' : ''}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-title">订单完成</view>
+          <view class="timeline-time" wx:if="{{orderInfo.completeDate}}">{{orderInfo.completeDate}}</view>
+          <view class="timeline-desc">
+            {{orderInfo.status === 'completed' ? '订单已完成' : '等待手艺人完成并确认收款'}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Complete Photos -->
+  <view class="card" wx:if="{{orderInfo.completePhotos && orderInfo.completePhotos.length > 0}}">
+    <view class="card-title">完成照片</view>
+    <view class="photo-list">
+      <image 
+        wx:for="{{orderInfo.completePhotos}}" 
+        wx:key="index"
+        class="photo-item"
+        src="{{item}}"
+        mode="aspectFill"
+        bindtap="previewPhoto"
+        data-url="{{item}}"
+      />
+    </view>
+  </view>
+
+  <!-- Actions -->
+  <view class="action-bar">
+    <view class="action-btn btn-contact" bindtap="contactCraftsman" wx:if="{{orderInfo.craftsmanPhone}}">
+      联系手艺人
+    </view>
+    <view class="action-btn btn-primary" bindtap="confirmComplete" wx:if="{{orderInfo.status === 'shipped'}}">
+      确认完成
+    </view>
+  </view>
+</view>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Work_Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline": "#7f756c",
+              "inverse-primary": "#dcc2a7",
+              "surface-tint": "#6f5b44",
+              "secondary-fixed-dim": "#c9c6c3",
+              "secondary": "#5f5e5c",
+              "primary": "#6c5842",
+              "on-tertiary-fixed": "#221a0e",
+              "surface-bright": "#fcf9f4",
+              "outline-variant": "#d1c4ba",
+              "inverse-on-surface": "#f3f0eb",
+              "on-secondary-fixed-variant": "#474745",
+              "on-primary-fixed-variant": "#56432f",
+              "secondary-fixed": "#e5e2df",
+              "on-surface-variant": "#4e453d",
+              "on-surface": "#1c1c19",
+              "surface-variant": "#e5e2dd",
+              "on-secondary": "#ffffff",
+              "primary-fixed-dim": "#dcc2a7",
+              "surface-dim": "#dcdad5",
+              "primary-fixed": "#fadec1",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#867159",
+              "on-secondary-fixed": "#1c1c1a",
+              "tertiary-fixed": "#f0e0cc",
+              "on-secondary-container": "#656462",
+              "surface-container": "#f0ede8",
+              "tertiary-fixed-dim": "#d3c4b1",
+              "surface-container-highest": "#e5e2dd",
+              "on-error": "#ffffff",
+              "surface-container-low": "#f6f3ee",
+              "surface": "#fcf9f4",
+              "on-tertiary-container": "#fffbff",
+              "inverse-surface": "#31302d",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#fffbff",
+              "surface-container-high": "#ebe8e3",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "error": "#ba1a1a",
+              "on-background": "#1c1c19",
+              "background": "#fcf9f4",
+              "secondary-container": "#e5e2df",
+              "tertiary-container": "#7f7362",
+              "on-primary-fixed": "#271907",
+              "on-tertiary-fixed-variant": "#4f4537",
+              "tertiary": "#655a4b"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Work Sans"],
+              "label": ["Work Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.linen-texture {
+    background-color: #fcf9f4;
+    background-image: radial-gradient(#d1c4ba 0.5px, transparent 0.5px);
+    background-size: 16px 16px;
+    background-position: 0 0, 8px 8px;
+    opacity: 0.4
+    }
+.canvas-bg {
+    background-color: #fcf9f4;
+    position: relative
+    }
+.canvas-bg::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDEqS3RrfSnufzjK8Dvz6INeHBv9Cx3LgrVgcKUJHllsZfvIasx_rRbJn8jkr-pBxyQXTnwK73DBvM6wySoYzR8vr7OFX-S4iuZzHxJvuKSqa683Pg6fuEwhCshNGjPVCqdTQla7TckILr_HG9KVrP-FCn-WqZt_QrXHKJnLznfIuPuSI2N8aDI4bUOoMT28TiohqIxEoBms9znlu6wVrN2EXG0oRnwjP39dM7ZPT15PUNwGU9SPxAp5VT243AE7s5aYjz4KO1Kl5wv);
+    opacity: 0.05;
+    pointer-events: none
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="bg-[#fcf9f4] dark:bg-[#1c1c19] opacity-85 backdrop-blur-md docked full-width top-0 sticky z-50 shadow-[0px_10px_30px_rgba(28,28,25,0.05)] dark:shadow-none">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#6c5842] dark:text-[#d1c4ba]">menu</span>
+</div>
+<h1 class="font-['Manrope'] font-extrabold text-[#6c5842] dark:text-[#f6f3ee] tracking-tighter text-lg">Sùyǎ Artisans</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Craftsman Profile Photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbnNmHY0O1p3r5LqQ7z99SiRkm32q9tnXLpwgEf_MrHjei681ClilH0K10L3DBxATfXrN3ZeczyYPWHqhtekHySlnCy6OYagTo-vCkEGzZPVRvovAgeXyNZ2X3YKYUtFkwPH3ISWmriqpwsGmanHDtmZS9_stiMk-XlWU8U5MV8RljuTXRNCwna6oVvLIFodDpqFu4iSB-XdlMrHCXa8wkCG7seFTfWpCdmnSlnWJAI0E5etOnHFe0VvWedDVHGHi-htRp2KgbKfvc"/>
+</div>
+</div>
+<div class="bg-[#e5e2dd] dark:bg-[#2d2a26] h-[1px] w-full opacity-15"></div>
+</header>
+<main class="canvas-bg min-h-screen pb-32">
+<!-- Hero Section: Material Header -->
+<section class="px-8 pt-12 pb-8">
+<div class="max-w-md mx-auto">
+<h2 class="font-headline font-extrabold text-4xl text-primary tracking-tighter mb-2">你好，匠心</h2>
+<p class="font-body text-on-surface-variant text-lg opacity-80 leading-relaxed">每一个作品，都是时间的低语。</p>
+</div>
+</section>
+<!-- Artisan Profile Section -->
+<section class="px-8 mb-16">
+<div class="max-w-md mx-auto bg-surface-container-low rounded-xl p-6 flex items-start gap-6 shadow-[0px_10px_30px_rgba(28,28,25,0.02)]">
+<div class="relative">
+<div class="w-20 h-20 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Close up of artisan hands working with clay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMgjeeTLUyzspHvQ-QOZtirhvsW8KyZkXQugIq9FAwaSJ9x1-JUpOsFIW-sSzhyF5NK2B5Up0IGkDHcaDvmiSe0A-fnSmdHdgNKZVVwiOJsTu87T8Lh9rFQ0n6dSoCgIpoKajzk1u2B-wI3xNCD6t-1gyswtdgBBYAZHXs9Te04ziROkq8RHHBqgkwFAiK2sYa7Q0XLuipg2Bu2LXwvTraSdPdJT7KXU4IX0fkqHGIqgtkFy0t1dRAhexLkuTBqlESRErA57Ud5sqU"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white p-1 rounded-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-xl text-on-surface mb-3">林木凡</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-medium px-3 py-1 rounded-full uppercase tracking-wider">陶艺</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-medium px-3 py-1 rounded-full uppercase tracking-wider">木作</span>
+</div>
+<p class="mt-4 text-xs font-medium text-on-surface-variant opacity-60 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">location_on</span>
+                        景德镇 · 艺术工作室
+                    </p>
+</div>
+</div>
+</section>
+<!-- Daily Work Summary (Bento Layout) -->
+<section class="px-8">
+<div class="max-w-md mx-auto">
+<div class="flex justify-between items-end mb-6 pl-2">
+<h3 class="font-headline font-bold text-2xl text-on-surface tracking-tight">工作概览</h3>
+<button class="text-xs font-medium text-primary border-b border-outline-variant/30 pb-1">查看全部</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Task: Pending (100% width row) -->
+<div class="col-span-2 bg-primary text-on-primary p-8 rounded-xl shadow-lg relative overflow-hidden">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-3xl mb-4" style="font-variation-settings: 'FILL' 0;">pending_actions</span>
+<div class="text-4xl font-headline font-extrabold mb-1">12</div>
+<div class="text-sm font-medium opacity-80">待处理任务</div>
+</div>
+<!-- Abstract Texture Decoration -->
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+</div>
+<!-- Task: In Progress -->
+<div class="bg-surface-container-highest p-6 rounded-xl flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-primary-container text-2xl">autorenew</span>
+<div>
+<div class="text-2xl font-headline font-extrabold text-on-surface">04</div>
+<div class="text-xs font-medium text-on-surface-variant mt-1 uppercase tracking-tight">进行中</div>
+</div>
+</div>
+<!-- Task: Quality Check -->
+<div class="bg-secondary-fixed p-6 rounded-xl flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-secondary text-2xl">inventory_2</span>
+<div>
+<div class="text-2xl font-headline font-extrabold text-on-surface">08</div>
+<div class="text-xs font-medium text-on-surface-variant mt-1 uppercase tracking-tight">质检入库</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Asymmetric Showcase -->
+<section class="px-8 mt-16">
+<div class="max-w-md mx-auto">
+<h3 class="font-headline font-bold text-lg text-on-surface mb-6 pl-2">近期作品</h3>
+<div class="flex gap-4 items-start">
+<div class="w-[60%] rounded-xl overflow-hidden aspect-[3/4] shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Handcrafted ceramic tea bowl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaOGc3zhFoRXPJJgMGC9543ZpVmDv0vuUuTgiUekL7yoKgNSi6ZhBDUmsIkbDvObOzqdk95TFBcLz-BJ-tRdkZutBSTjfZWgkiw-DJeLcIVSsBlzFO9HM9btUTJP8AsURIzL5-TGCfmxUIh3L3ls_HSEUdlaMcc1yRErrZuk3V5dCa0bldFkYcsToDMuqvVYQiFGWVtFdgZW7nTgjtQiKYwkHnLMz77utRoeGIcEbUOP42tECwNXOVO6iD1oQXrrUeYIXfFnmQBV7t"/>
+</div>
+<div class="w-[40%] flex flex-col gap-4">
+<div class="rounded-xl overflow-hidden aspect-square shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Macro of wood grain texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpCRkqLKoYZXTWOpSIwdZbNNS2YDwKn_lYBmQtEK5lrfYWWByvgihOJ_bEynmqa5zv-kgcI0g3VuzCyIq7U3YaP9wsqJRYMC8gylFynhlExN_mgIAmYu0mn06kF-alvxuDvPKETYJHP-Nug87AW1rQxMqFgpilgM_H-lAZBbuwAEGTVEy60Vkibsft0M9YsntiIRjXUHKPFim2YZBzMDWmeY7wlBtwtKAlVh9e3w9PyFbMlsoB-qajxNDjbnl9XbwJxGdXd7ft5scL"/>
+</div>
+<div class="bg-surface-container-high rounded-xl aspect-square flex items-center justify-center p-4">
+<div class="text-center">
+<div class="text-xl font-headline font-bold text-primary">+14</div>
+<div class="text-[10px] font-medium text-on-surface-variant uppercase">新图库</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-2 bg-[#fcf9f4]/85 dark:bg-[#1c1c19]/85 backdrop-blur-xl z-50 rounded-t-xl border-t border-[#d1c4ba]/15 shadow-[0_-5px_20px_rgba(28,28,25,0.03)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-[#6c5842] dark:text-[#fcf9f4] bg-[#e5e2dd]/50 dark:bg-[#6c5842]/20 rounded-xl px-4 py-1 scale-95 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home_work</span>
+<span class="font-['Work_Sans'] text-[11px] font-medium leading-relaxed mt-1">Home</span>
+</a>
+<!-- Tasks -->
+<a class="flex flex-col items-center justify-center text-[#4e453d] dark:text-[#a1968d] opacity-60 px-4 py-1 hover:opacity-100 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-['Work_Sans'] text-[11px] font-medium leading-relaxed mt-1">Tasks</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#4e453d] dark:text-[#a1968d] opacity-60 px-4 py-1 hover:opacity-100 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Work_Sans'] text-[11px] font-medium leading-relaxed mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

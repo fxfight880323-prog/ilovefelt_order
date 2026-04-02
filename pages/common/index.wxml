@@ -1,0 +1,233 @@
+<view class="container canvas-bg">
+  <!-- Hero Section: Material Header -->
+  <view class="hero-section">
+    <view class="hero-title">你好，匠心</view>
+    <view class="hero-subtitle">每一个作品，都是时间的低语。</view>
+  </view>
+
+  <!-- User Profile Card -->
+  <view class="card card-elevated" wx:if="{{roleInfo}}">
+    <view class="flex items-center gap-4">
+      <!-- Avatar -->
+      <view class="avatar-wrap">
+        <image 
+          class="avatar avatar-lg" 
+          src="{{roleInfo.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" 
+          mode="aspectFill"
+          binderror="onAvatarError"
+        />
+        <view class="avatar-badge">
+          <text style="font-size: 18rpx;">✓</text>
+        </view>
+      </view>
+      
+      <!-- User Info -->
+      <view class="flex-1">
+        <view class="headline-sm" style="margin-bottom: 8rpx;">
+          {{roleInfo.name}}
+        </view>
+        <view class="flex items-center gap-2" style="margin-bottom: 12rpx;">
+          <view class="chip chip-primary">
+            {{currentRole === 'admin' ? '管理员' : (currentRole === 'dispatcher' ? '派单人' : '手艺人')}}
+          </view>
+          <view wx:if="{{currentRole === 'craftsman' && roleInfo.starLevel}}" class="flex items-center">
+            <text wx:for="{{5}}" wx:key="index" style="color: {{index < roleInfo.starLevel ? '#d4a574' : 'var(--outline-variant)'}}; font-size: 24rpx;">★</text>
+          </view>
+        </view>
+        <view wx:if="{{roleInfo.specialty}}" class="flex items-center gap-1" style="color: var(--on-surface-variant); font-size: 24rpx;">
+          <text style="font-size: 20rpx;">📍</text>
+          <text>{{roleInfo.specialty}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Multi-role hint -->
+    <view wx:if="{{availableRoles.length > 1}}" style="margin-top: 20rpx; padding-top: 20rpx; border-top: 2rpx solid var(--outline-variant); border-top-opacity: 0.15;">
+      <text style="font-size: 22rpx; color: var(--on-surface-variant);">
+        您拥有 {{availableRoles.length}} 个角色，点击"账号设置"切换
+      </text>
+    </view>
+  </view>
+
+  <!-- Work Overview Section (Bento Grid) -->
+  <view class="section-header">
+    <view class="section-title">工作概览</view>
+    <view class="section-action" bindtap="goToStatistics">查看全部</view>
+  </view>
+  
+  <view class="bento-grid">
+    <!-- Pending Tasks - Full Width -->
+    <view class="card card-primary bento-item-full" bindtap="goToOrderHall" wx:if="{{currentRole === 'craftsman'}}">
+      <view style="position: relative; z-index: 1;">
+        <view style="font-size: 48rpx; margin-bottom: 16rpx;">📋</view>
+        <view class="display-md" style="margin-bottom: 8rpx;">{{stats.pendingCount}}</view>
+        <view style="font-size: 26rpx; opacity: 0.8;">待处理任务</view>
+      </view>
+      <!-- Decorative blur -->
+      <view style="position: absolute; top: -40rpx; right: -40rpx; width: 200rpx; height: 200rpx; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(20rpx);"></view>
+    </view>
+    
+    <!-- For dispatcher/admin - Create Order -->
+    <view class="card card-primary bento-item-full" bindtap="goToCreateOrder" wx:if="{{currentRole === 'dispatcher' || currentRole === 'admin'}}">
+      <view style="position: relative; z-index: 1;">
+        <view style="font-size: 48rpx; margin-bottom: 16rpx;">✏️</view>
+        <view class="display-md" style="margin-bottom: 8rpx;">新建订单</view>
+        <view style="font-size: 26rpx; opacity: 0.8;">快速创建派单</view>
+      </view>
+    </view>
+    
+    <!-- In Progress -->
+    <view class="card" style="background: var(--surface-container-highest); display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1;">
+      <view style="font-size: 40rpx; color: var(--primary-container);">🔄</view>
+      <view>
+        <view class="headline-sm">{{stats.acceptedCount}}</view>
+        <view class="label-sm" style="margin-top: 4rpx; color: var(--on-surface-variant);">进行中</view>
+      </view>
+    </view>
+    
+    <!-- Completed -->
+    <view class="card card-secondary" style="display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 1;">
+      <view style="font-size: 40rpx; color: var(--secondary);">✓</view>
+      <view>
+        <view class="headline-sm">{{stats.completedCount}}</view>
+        <view class="label-sm" style="margin-top: 4rpx; color: var(--on-surface-variant);">已完成</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Function Cards -->
+  <view class="section-header" style="margin-top: 32rpx;">
+    <view class="section-title">功能中心</view>
+  </view>
+  
+  <!-- Admin Functions -->
+  <view class="grid-4" wx:if="{{currentRole === 'admin'}}">
+    <view class="func-item" bindtap="goToAdminConsole">
+      <view class="func-icon" style="background: var(--tertiary-fixed); color: var(--on-tertiary-fixed);">⚙️</view>
+      <view class="func-text">控制台</view>
+    </view>
+    <view class="func-item" bindtap="goToCreateOrder">
+      <view class="func-icon" style="background: var(--primary-fixed); color: var(--on-primary-fixed);">📝</view>
+      <view class="func-text">新建订单</view>
+    </view>
+    <view class="func-item" bindtap="goToOrderManage">
+      <view class="func-icon" style="background: var(--secondary-fixed); color: var(--on-secondary-fixed);">📋</view>
+      <view class="func-text">订单管理</view>
+    </view>
+    <view class="func-item" bindtap="goToStatistics">
+      <view class="func-icon" style="background: var(--tertiary-fixed); color: var(--on-tertiary-fixed);">📊</view>
+      <view class="func-text">数据统计</view>
+    </view>
+  </view>
+  
+  <!-- Dispatcher Functions -->
+  <view class="grid-4" wx:if="{{currentRole === 'dispatcher'}}">
+    <view class="func-item" bindtap="goToCreateOrder">
+      <view class="func-icon" style="background: var(--primary-fixed); color: var(--on-primary-fixed);">📝</view>
+      <view class="func-text">新建派单</view>
+    </view>
+    <view class="func-item" bindtap="goToMyDispatchOrders">
+      <view class="func-icon" style="background: var(--secondary-fixed); color: var(--on-secondary-fixed);">📋</view>
+      <view class="func-text">我的派单</view>
+    </view>
+    <view class="func-item" bindtap="goToStyleManage">
+      <view class="func-icon" style="background: var(--tertiary-fixed); color: var(--on-tertiary-fixed);">🎨</view>
+      <view class="func-text">样式管理</view>
+    </view>
+    <view class="func-item" bindtap="goToStatistics">
+      <view class="func-icon" style="background: var(--primary-fixed); color: var(--on-primary-fixed);">📊</view>
+      <view class="func-text">数据统计</view>
+    </view>
+  </view>
+  
+  <!-- Craftsman Functions -->
+  <view class="grid-4" wx:if="{{currentRole === 'craftsman'}}">
+    <view class="func-item" bindtap="goToOrderHall">
+      <view class="func-icon" style="background: var(--primary-fixed); color: var(--on-primary-fixed);">🏪</view>
+      <view class="func-text">接单大厅</view>
+    </view>
+    <view class="func-item" bindtap="goToMyOrders">
+      <view class="func-icon" style="background: var(--secondary-fixed); color: var(--on-secondary-fixed);">📦</view>
+      <view class="func-text">我的订单</view>
+    </view>
+    <view class="func-item" bindtap="goToProfile">
+      <view class="func-icon" style="background: var(--tertiary-fixed); color: var(--on-tertiary-fixed);">👤</view>
+      <view class="func-text">个人资料</view>
+    </view>
+    <view class="func-item" bindtap="goToStatistics">
+      <view class="func-icon" style="background: var(--primary-fixed); color: var(--on-primary-fixed);">📊</view>
+      <view class="func-text">业绩统计</view>
+    </view>
+  </view>
+
+  <!-- Notice Section -->
+  <view class="section-header" style="margin-top: 32rpx;" wx:if="{{noticeList.length > 0}}">
+    <view class="section-title">最新公告</view>
+    <view class="section-action">更多</view>
+  </view>
+  
+  <view class="card" wx:if="{{noticeList.length > 0}}">
+    <view class="list" style="gap: 12rpx;">
+      <view class="notice-row" wx:for="{{noticeList}}" wx:key="_id">
+        <view style="width: 16rpx; height: 16rpx; border-radius: 50%; background: var(--primary); margin-right: 16rpx; flex-shrink: 0; margin-top: 10rpx;"></view>
+        <view class="flex-1">
+          <view style="font-size: 28rpx; color: var(--on-surface); margin-bottom: 8rpx;">{{item.title}}</view>
+          <view style="font-size: 24rpx; color: var(--on-surface-variant);">{{item.createTime}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Guest State -->
+  <view class="card" wx:if="{{userRole === 'guest'}}">
+    <view class="empty-state">
+      <view class="empty-icon">📝</view>
+      <view class="empty-text">您还未注册</view>
+      <view class="empty-desc">请选择角色进行注册</view>
+      <button class="btn btn-primary mt-4" bindtap="switchRole">去选择角色</button>
+    </view>
+  </view>
+
+  <!-- Enter Workspace Button -->
+  <view class="card card-primary" style="margin-top: 32rpx; padding: 40rpx; text-align: center;" wx:if="{{userRole !== 'guest'}}" bindtap="enterWorkspace">
+    <view style="font-size: 48rpx; margin-bottom: 16rpx;">
+      {{currentRole === 'craftsman' ? '🏭' : (currentRole === 'dispatcher' ? '📤' : '⚙️')}}
+    </view>
+    <view style="font-size: 32rpx; font-weight: 600; margin-bottom: 8rpx;">
+      进入{{currentRole === 'craftsman' ? '手艺人' : (currentRole === 'dispatcher' ? '派单人' : '管理员')}}工作台
+    </view>
+    <view style="font-size: 24rpx; opacity: 0.8;">
+      点击进入您的专属工作界面
+    </view>
+  </view>
+
+  <!-- Account Settings -->
+  <view class="section-header" style="margin-top: 32rpx;" wx:if="{{userRole !== 'guest'}}">
+    <view class="section-title">账号设置</view>
+  </view>
+  
+  <view class="card" wx:if="{{userRole !== 'guest'}}">
+    <view class="menu-list">
+      <view class="menu-item" bindtap="switchRole" style="padding-left: 0;">
+        <view class="menu-icon" style="width: 72rpx; height: 72rpx; font-size: 32rpx;">🔄</view>
+        <view class="menu-content">
+          <view class="menu-title">切换角色</view>
+          <view class="menu-desc">在多个角色间切换</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+      <view class="divider"></view>
+      <view class="menu-item" bindtap="logout" style="padding-left: 0;">
+        <view class="menu-icon" style="width: 72rpx; height: 72rpx; font-size: 32rpx;">🚪</view>
+        <view class="menu-content">
+          <view class="menu-title">退出登录</view>
+          <view class="menu-desc">安全退出当前账号</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Bottom Spacer -->
+  <view style="height: 40rpx;"></view>
+</view>

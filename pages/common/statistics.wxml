@@ -1,0 +1,90 @@
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="page-title">数据统计</view>
+    <view class="page-subtitle">{{subtitle}}</view>
+  </view>
+
+  <!-- 角色切换（管理员显示全部） -->
+  <view class="role-tabs" wx:if="{{isAdmin}}">
+    <view class="tab-item {{currentRole === 'admin' ? 'active' : ''}}" bindtap="switchRole" data-role="admin">
+      全局统计
+    </view>
+    <view class="tab-item {{currentRole === 'dispatcher' ? 'active' : ''}}" bindtap="switchRole" data-role="dispatcher">
+      派单统计
+    </view>
+    <view class="tab-item {{currentRole === 'craftsman' ? 'active' : ''}}" bindtap="switchRole" data-role="craftsman">
+      接单统计
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-grid">
+    <view class="stat-card" wx:for="{{statsCards}}" wx:key="key">
+      <view class="stat-icon" style="background: {{item.color}}20; color: {{item.color}}">{{item.icon}}</view>
+      <view class="stat-value">{{item.value}}</view>
+      <view class="stat-label">{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- 趋势图表 -->
+  <view class="chart-card">
+    <view class="card-header">
+      <view class="card-title">近30天订单趋势</view>
+      <view class="card-actions">
+        <picker mode="selector" range="{{chartTypes}}" value="{{chartTypeIndex}}" bindchange="onChartTypeChange">
+          <view class="picker-btn">{{chartTypes[chartTypeIndex]}} ▼</view>
+        </picker>
+      </view>
+    </view>
+    <view class="chart-container">
+      <canvas type="2d" id="trendChart" class="chart-canvas"></canvas>
+    </view>
+  </view>
+
+  <!-- 手艺人排行榜（管理员/派单人可见） -->
+  <view class="rank-card" wx:if="{{currentRole !== 'craftsman'}}">
+    <view class="card-header">
+      <view class="card-title">手艺人排行榜 TOP10</view>
+      <view class="card-subtitle">按完成金额和评价排序</view>
+    </view>
+    <view class="rank-list">
+      <view class="rank-item" wx:for="{{craftsmanRank}}" wx:key="_id">
+        <view class="rank-number {{index < 3 ? 'top' : ''}}">{{index + 1}}</view>
+        <view class="rank-info">
+          <view class="rank-name">{{item.name}}</view>
+          <view class="rank-meta">
+            <text class="rank-score">★ {{item.rating || 0}}</text>
+            <text class="rank-count">完成 {{item.completedOrders || 0}} 单</text>
+          </view>
+        </view>
+        <view class="rank-amount-primary">¥{{item.totalAmount || 0}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的评分（手艺人可见） -->
+  <view class="rating-card" wx:if="{{currentRole === 'craftsman' && myRating}}">
+    <view class="card-header">
+      <view class="card-title">我的评分</view>
+    </view>
+    <view class="rating-overview">
+      <view class="rating-score">{{myRating.avgScore}}</view>
+      <view class="rating-stars">
+        <text wx:for="{{5}}" wx:key="*this" class="star {{index < myRating.avgScore ? 'active' : ''}}">★</text>
+      </view>
+      <view class="rating-count">共 {{myRating.total}} 条评价</view>
+    </view>
+    <view class="rating-list">
+      <view class="rating-item" wx:for="{{myRating.list}}" wx:key="_id">
+        <view class="rating-header">
+          <view class="rating-stars-small">
+            <text wx:for="{{item.score}}" wx:key="*this" class="star-small">★</text>
+          </view>
+          <view class="rating-time">{{item.createTime}}</view>
+        </view>
+        <view class="rating-comment">{{item.comment || '暂无评论'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "name": "migrate_data",
+  "version": "1.0.0",
+  "description": "数据迁移工具：从云数据库迁移到 MySQL",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

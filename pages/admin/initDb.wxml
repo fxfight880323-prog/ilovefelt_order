@@ -1,0 +1,65 @@
+<view class="container">
+  <view class="header">
+    <text class="title">数据库初始化</text>
+    <text class="subtitle">创建必要的数据集合和索引</text>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-area">
+    <button class="btn btn-primary" bindtap="checkDatabase" disabled="{{loading}}">
+      {{loading ? '检查中...' : '检查数据库状态'}}
+    </button>
+    <button class="btn btn-success" bindtap="initDatabase" disabled="{{loading}}">
+      {{loading ? '初始化中...' : '初始化数据库'}}
+    </button>
+  </view>
+
+  <!-- 结果展示 -->
+  <view class="result-area" wx:if="{{result}}">
+    <view class="result-title">执行结果</view>
+    <view class="result-summary">
+      <view class="summary-item success">
+        <text class="label">创建成功:</text>
+        <text class="value">{{result.data.summary.created}} 个</text>
+      </view>
+      <view class="summary-item info">
+        <text class="label">已存在:</text>
+        <text class="value">{{result.data.summary.exists}} 个</text>
+      </view>
+      <view class="summary-item error" wx:if="{{result.data.summary.error > 0}}">
+        <text class="label">失败:</text>
+        <text class="value">{{result.data.summary.error}} 个</text>
+      </view>
+    </view>
+
+    <!-- 集合列表 -->
+    <view class="collection-list">
+      <view class="list-title">集合状态</view>
+      <view class="collection-item {{item.status}}" wx:for="{{collections}}" wx:key="name">
+        <view class="item-info">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-desc">{{item.desc}}</text>
+        </view>
+        <view class="item-status">
+          <text wx:if="{{item.status === 'created'}}">✅ 已创建</text>
+          <text wx:if="{{item.status === 'exists'}}">📋 已存在</text>
+          <text wx:if="{{item.status === 'error'}}">❌ {{item.message}}</text>
+          <text wx:if="{{item.status === 'missing'}}">⚠️ 缺失</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 说明 -->
+  <view class="tips-area">
+    <view class="tips-title">说明</view>
+    <view class="tips-list">
+      <view class="tip-item">1. 首次使用请点击「初始化数据库」</view>
+      <view class="tip-item">2. 会创建 users、dispatchers、orders 等集合</view>
+      <view class="tip-item">3. 已存在的集合不会被重复创建</view>
+      <view class="tip-item">4. 仅限管理员操作</view>
+    </view>
+  </view>
+
+  <button class="btn btn-default" bindtap="goBack">返回</button>
+</view>

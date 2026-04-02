@@ -1,0 +1,143 @@
+<view class="container">
+  <view class="card">
+    <view class="card-title">{{isEditMode ? '修改订单' : '新建订单'}}</view>
+    
+    <!-- 头像上传 -->
+    <view class="form-item avatar-item">
+      <text class="form-label">订单图片</text>
+      <view class="avatar-upload" bindtap="chooseImage">
+        <image wx:if="{{form.imageUrl}}" src="{{form.imageUrl}}" mode="aspectFill" class="avatar-img"/>
+        <view wx:else class="avatar-placeholder">
+          <text class="avatar-icon">📷</text>
+          <text class="avatar-text">上传图片</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单名称 -->
+    <view class="form-item">
+      <text class="form-label required">订单名称</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入订单名称"
+        value="{{form.name}}"
+        bindinput="onNameInput"
+      />
+    </view>
+
+    <!-- 样式选择 -->
+    <view class="form-item">
+      <text class="form-label required">样式</text>
+      <view class="style-select-area">
+        <picker 
+          mode="selector" 
+          range="{{styleList}}" 
+          range-key="name"
+          value="{{styleIndex}}"
+          bindchange="onStyleChange"
+        >
+          <view class="form-picker">
+            <text wx:if="{{form.styleName}}">{{form.styleName}}</text>
+            <text wx:else class="placeholder" style="color: #999;">请选择样式</text>
+          </view>
+        </picker>
+      </view>
+      
+      <!-- 已添加的样式标签 -->
+      <view class="style-tags" wx:if="{{styleList.length > 0}}">
+        <view 
+          class="style-tag {{form.styleId === item._id ? 'active' : ''}}" 
+          wx:for="{{styleList}}" 
+          wx:key="_id"
+          bindtap="selectStyle"
+          data-index="{{index}}"
+        >
+          {{item.name}}
+        </view>
+      </view>
+      
+      <!-- 新建样式输入 -->
+      <view class="new-style-section">
+        <view class="btn btn-primary btn-sm" bindtap="showAddStyle" wx:if="{{!showNewStyleInput}}">+ 添加新样式</view>
+        <view class="new-style-input" wx:if="{{showNewStyleInput}}">
+          <input 
+            class="form-input" 
+            placeholder="请输入新样式名称（如：挂包、摆件）"
+            value="{{newStyleName}}"
+            bindinput="onNewStyleInput"
+            focus="{{showNewStyleInput}}"
+          />
+          <view class="new-style-actions">
+            <view class="btn btn-default btn-sm" bindtap="cancelAddStyle">取消</view>
+            <view class="btn btn-primary btn-sm" bindtap="confirmAddStyle">确认</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 数量 -->
+    <view class="form-item">
+      <text class="form-label required">数量</text>
+      <input 
+        class="form-input" 
+        type="number"
+        placeholder="请输入数量"
+        value="{{form.quantity}}"
+        bindinput="onQuantityInput"
+      />
+    </view>
+
+    <!-- 价格 -->
+    <view class="form-item">
+      <text class="form-label required">单价（元）</text>
+      <input 
+        class="form-input" 
+        type="digit"
+        placeholder="请输入单价"
+        value="{{form.price}}"
+        bindinput="onPriceInput"
+      />
+    </view>
+
+    <!-- 派单日期 -->
+    <view class="form-item">
+      <text class="form-label required">派单日期</text>
+      <picker mode="date" value="{{form.dispatchDate}}" bindchange="onDispatchDateChange">
+        <view class="form-picker">
+          <text wx:if="{{form.dispatchDate}}">{{form.dispatchDate}}</text>
+          <text wx:else style="color: #999;">请选择派单日期</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 收货日期 -->
+    <view class="form-item">
+      <text class="form-label required">收货日期</text>
+      <picker mode="date" value="{{form.receiveDate}}" bindchange="onReceiveDateChange">
+        <view class="form-picker">
+          <text wx:if="{{form.receiveDate}}">{{form.receiveDate}}</text>
+          <text wx:else style="color: #999;">请选择收货日期</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 备注 -->
+    <view class="form-item">
+      <text class="form-label">备注</text>
+      <textarea 
+        class="form-textarea" 
+        placeholder="请输入备注信息（选填）"
+        value="{{form.remark}}"
+        bindinput="onRemarkInput"
+        maxlength="200"
+      />
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-area">
+    <button class="btn btn-primary" bindtap="submitForm" disabled="{{submitting}}">
+      {{submitting ? '保存中...' : (isEditMode ? '保存修改' : '创建订单')}}
+    </button>
+  </view>
+</view>

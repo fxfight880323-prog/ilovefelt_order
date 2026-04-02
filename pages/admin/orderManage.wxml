@@ -1,0 +1,186 @@
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input 
+      class="search-input" 
+      placeholder="搜索订单名称或样式"
+      value="{{keyword}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <view class="btn btn-primary btn-sm ml-20" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="status-tabs">
+    <scroll-view scroll-x class="status-scroll" show-scrollbar="false">
+      <view 
+        class="tab-item {{currentStatus === item.value ? 'active' : ''}}"
+        wx:for="{{statusOptions}}"
+        wx:key="value"
+        data-status="{{item.value}}"
+        bindtap="switchStatus"
+      >
+        {{item.label}}
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view class="list-item order-item" wx:for="{{orderList}}" wx:key="_id">
+      <view class="list-item-header">
+        <view style="flex: 1;">
+          <view class="order-name">{{item.name}}</view>
+          <view style="font-size: 22rpx; color: #666; margin-top: 4rpx;">#{{item.orderCode || item._id}}</view>
+        </view>
+        <view class="status-tag status-{{item.status}}">
+          {{item.status === 'pending' ? '待接单' : 
+            item.status === 'accepted' ? (item.assignType === 'admin' ? '已指派' : '进行中') : 
+            item.status === 'shipped' ? '已发货' :
+            item.status === 'completed' ? (item.paymentStatus === 'pending_receipt' ? '待收款' : item.paymentStatus === 'paid' ? '已收款' : '已完成') : 
+            item.status === 'closed' ? '已结束' : '已取消'}}
+        </view>
+        <!-- 付款状态标签 -->
+        <view class="status-tag" wx:if="{{item.paymentStatus && item.paymentStatus !== 'unpaid'}}" style="margin-left: 8rpx; background: {{item.paymentStatus === 'pending_receipt' ? '#fff7e6' : '#f6ffed'}}; color: {{item.paymentStatus === 'pending_receipt' ? '#fa8c16' : '#389e0d'}};">
+          {{item.paymentStatus === 'pending_receipt' ? '待收款' : '已收款'}}
+        </view>
+      </view>
+      
+      <!-- 订单图片 -->
+      <view class="order-image-section" wx:if="{{item.imageUrl}}">
+        <image 
+          class="order-image" 
+          src="{{item.imageUrl}}" 
+          mode="aspectFill"
+          bindtap="previewOrderImage"
+          data-url="{{item.imageUrl}}"
+        />
+        <view class="image-hint">点击查看大图</view>
+      </view>
+      
+      <view class="list-item-content">
+        <view class="info-row">
+          <text class="info-label">样式：</text>
+          <text class="info-value">{{item.styleName}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">数量：</text>
+          <text class="info-value">{{item.quantity}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">单价：</text>
+          <text class="info-value text-primary text-bold">¥{{item.price}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">总价：</text>
+          <text class="info-value text-error text-bold">¥{{item.totalPrice}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">收货日期：</text>
+          <text class="info-value">{{item.receiveDate}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.craftsmanName}}">
+          <text class="info-label">接单人：</text>
+          <text class="info-value">{{item.craftsmanName}}</text>
+        </view>
+      </view>
+      
+      <view class="list-item-footer">
+        <text class="create-time">{{item.createTime}}</text>
+        <view class="action-btns">
+          <view 
+            class="btn btn-default btn-sm" 
+            bindtap="viewOrderDetail" 
+            data-id="{{item._id}}"
+          >查看</view>
+          <view 
+            class="btn btn-success btn-sm ml-10" 
+            wx:if="{{item.status === 'pending'}}"
+            bindtap="showAssignModal" 
+            data-id="{{item._id}}"
+          >指派</view>
+          <view 
+            class="btn btn-primary btn-sm ml-10" 
+            wx:if="{{item.status === 'pending'}}"
+            bindtap="editOrder" 
+            data-id="{{item._id}}"
+          >编辑</view>
+          <view 
+            class="btn btn-success btn-sm ml-10" 
+            wx:if="{{item.status === 'completed' && item.paymentStatus === 'unpaid'}}"
+            bindtap="confirmPayment" 
+            data-id="{{item._id}}"
+          >确认付款</view>
+          <view 
+            class="btn btn-warning btn-sm ml-10" 
+            wx:if="{{item.status === 'pending' || item.status === 'accepted'}}"
+            bindtap="cancelOrder" 
+            data-id="{{item._id}}"
+          >取消</view>
+          <view 
+            class="btn btn-danger btn-sm ml-10" 
+            bindtap="deleteOrder" 
+            data-id="{{item._id}}"
+          >删除</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && orderList.length === 0}}">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">暂无订单</view>
+    <view class="empty-desc" wx:if="{{currentStatus !== 'all'}}">请尝试切换其他状态查看</view>
+    <button class="btn btn-primary btn-sm mt-20" bindtap="createOrder">新建订单</button>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore}}">
+    {{loading ? '加载中...' : '上拉加载更多'}}
+  </view>
+</view>
+
+<!-- 新建订单按钮 -->
+<view class="fab" bindtap="createOrder">+</view>
+
+<!-- 指派弹窗 -->
+<view class="modal" wx:if="{{showAssignModal}}" bindtap="closeAssignModal">
+  <view class="modal-content assign-modal" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">指派手艺人</text>
+      <view class="modal-close" bindtap="closeAssignModal">×</view>
+    </view>
+    <view class="modal-body">
+      <view class="craftsman-list-modal">
+        <view 
+          class="craftsman-item {{selectedCraftsmanId === item._id ? 'selected' : ''}}" 
+          wx:for="{{craftsmanList}}" 
+          wx:key="_id"
+          bindtap="selectCraftsman"
+          data-id="{{item._id}}"
+        >
+          <view class="craftsman-info-modal">
+            <text class="craftsman-name-modal">{{item.name}}</text>
+            <text class="craftsman-code" wx:if="{{item.code}}">({{item.code}})</text>
+          </view>
+          <view class="craftsman-tags">
+            <text class="tag tag-specialty">{{item.specialty}}</text>
+            <text class="tag tag-star" wx:if="{{item.starLevel}}">{{item.starLevel}}星</text>
+          </view>
+          <view class="craftsman-phone" wx:if="{{item.phone}}">{{item.phone}}</view>
+          <view class="selected-icon" wx:if="{{selectedCraftsmanId === item._id}}">✓</view>
+        </view>
+      </view>
+      <view class="empty-state" wx:if="{{craftsmanList.length === 0}}">
+        <text class="empty-text">暂无手艺人</text>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn btn-default" bindtap="closeAssignModal">取消</button>
+      <button class="btn btn-primary" bindtap="confirmAssign">确认指派</button>
+    </view>
+  </view>
+</view>

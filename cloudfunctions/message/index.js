@@ -6,15 +6,23 @@ cloud.init({
 
 const db = cloud.database()
 
-// 订阅消息模板ID（需要在微信公众平台配置）
+// 引入配置
+const subscribeConfig = {
+  NEW_ORDER: 'dUvWdLqKFxuJmYM69-V0X7SJ0LfeBx5bS9igrDgf6-4',
+  ORDER_STATUS_CHANGE: '',
+  ORDER_COMPLETE: '',
+  AUDIT_RESULT: ''
+}
+
+// 订阅消息模板ID
 const TMPL_IDS = {
-  NEW_ORDER: 'YOUR_NEW_ORDER_TMPL_ID',      // 新订单提醒
-  ORDER_ACCEPTED: 'YOUR_ACCEPT_TMPL_ID',    // 接单成功提醒
-  ORDER_COMPLETED: 'YOUR_COMPLETE_TMPL_ID'  // 订单完成提醒
+  NEW_ORDER: subscribeConfig.NEW_ORDER,           // 新订单提醒
+  ORDER_ACCEPTED: subscribeConfig.ORDER_STATUS_CHANGE,  // 接单成功提醒
+  ORDER_COMPLETED: subscribeConfig.ORDER_COMPLETE      // 订单完成提醒
 }
 
 exports.main = async (event, context) => {
-  const { action, orderId } = event
+  const { action, orderId, type, orderName, trackingNumber, trackingCompany, craftsmanName, dispatcherId, craftsmanId, totalPrice, tmplId, openid } = event
   
   try {
     switch (action) {
@@ -24,6 +32,14 @@ exports.main = async (event, context) => {
         return await sendAcceptConfirm(orderId)
       case 'sendCompleteNotice':
         return await sendCompleteNotice(orderId)
+      case 'sendPaymentNotice':
+        return await sendPaymentNotice(craftsmanId, orderName, totalPrice)
+      case 'sendReceiptNotice':
+        return await sendReceiptNotice(dispatcherId, orderName, craftsmanName)
+      case 'saveSubscribe':
+        return await saveSubscribe(openid, tmplId)
+      case 'notifyAdmin':
+        return await notifyAdmin(type, { orderName, trackingNumber, trackingCompany, craftsmanName })
       default:
         return { code: -1, message: '未知操作' }
     }
@@ -156,6 +172,154 @@ async function sendCompleteNotice(orderId) {
   }
   
   return { code: 0, message: '发送完成' }
+}
+
+// 通知管理员
+async function notifyAdmin(type, data) {
+  const { orderName, trackingNumber, trackingCompany, craftsmanName } = data
+  
+  // 获取所有管理员（openid列表）
+  // 管理员是 roles 包含 admin 的用户
+  const adminUsers = await db.collection('users').where({
+    roles: db.command.all(['admin'])
+  }).get()
+  
+  if (adminUsers.data.length === 0) {
+    console.log('没有找到管理员')
+    return { code: 0, message: '没有找到管理员' }
+  }
+  
+  // 根据类型构建通知内容
+  let title, content
+  if (type === 'tracking_added') {
+    title = '订单已发货'
+    content = `手艺人${craftsmanName}已为订单「${orderName}」填写运单号：${trackingCompany} ${trackingNumber}`
+  } else if (type === 'order_completed') {
+    title = '订单已完成'
+    content = `手艺人${craftsmanName}已完成订单「${orderName}」`
+  }
+  
+  // 发送给所有管理员
+  const sendPromises = adminUsers.data.map(async (admin) => {
+    if (admin.openid) {
+      try {
+        // 添加通知记录到数据库
+        await db.collection('notices').add({
+          data: {
+            type: 'admin',
+            toUser: admin.openid,
+            title,
+            content,
+            read: false,
+            createTime: db.serverDate()
+          }
+        })
+      } catch (err) {
+        console.error('通知管理员失败:', err)
+      }
+    }
+  })
+  
+  await Promise.all(sendPromises)
+  
+  return { code: 0, message: '通知已发送' }
+}
+
+// 发送付款通知给手艺人
+async function sendPaymentNotice(craftsmanId, orderName, totalPrice) {
+  // 获取手艺人信息
+  const craftsmanRes = await db.collection('craftsmen').doc(craftsmanId).get()
+  if (!craftsmanRes.data || !craftsmanRes.data.openid) {
+    return { code: 0, message: '手艺人未绑定微信' }
+  }
+  
+  const openid = craftsmanRes.data.openid
+  
+  // 添加通知记录到数据库
+  try {
+    await db.collection('notices').add({
+      data: {
+        type: 'payment',
+        toUser: openid,
+        title: '订单付款确认',
+        content: `订单「${orderName}」款项 ¥${totalPrice || 0} 已确认支付，请及时确认收款`,
+        read: false,
+        createTime: db.serverDate()
+      }
+    })
+  } catch (err) {
+    console.error('添加付款通知失败:', err)
+  }
+  
+  return { code: 0, message: '付款通知已发送' }
+}
+
+// 发送收款通知给派单人
+async function sendReceiptNotice(dispatcherId, orderName, craftsmanName) {
+  // 获取派单人信息
+  const dispatcherRes = await db.collection('dispatchers').doc(dispatcherId).get()
+  if (!dispatcherRes.data || !dispatcherRes.data.openid) {
+    return { code: 0, message: '派单人未绑定微信' }
+  }
+  
+  const openid = dispatcherRes.data.openid
+  
+  // 添加通知记录到数据库
+  try {
+    await db.collection('notices').add({
+      data: {
+        type: 'receipt',
+        toUser: openid,
+        title: '订单收款确认',
+        content: `手艺人${craftsmanName || ''}已确认收到订单「${orderName}」的款项，订单已结束`,
+        read: false,
+        createTime: db.serverDate()
+      }
+    })
+  } catch (err) {
+    console.error('添加收款通知失败:', err)
+  }
+  
+  return { code: 0, message: '收款通知已发送' }
+}
+
+// 保存订阅者信息
+async function saveSubscribe(openid, tmplId) {
+  if (!openid || !tmplId) {
+    return { code: -1, message: '缺少参数' }
+  }
+  
+  try {
+    // 检查是否已存在
+    const existRes = await db.collection('subscribers').where({
+      openid,
+      tmplId
+    }).get()
+    
+    if (existRes.data.length > 0) {
+      // 更新订阅时间
+      await db.collection('subscribers').doc(existRes.data[0]._id).update({
+        data: {
+          updateTime: db.serverDate()
+        }
+      })
+    } else {
+      // 创建新订阅记录
+      await db.collection('subscribers').add({
+        data: {
+          openid,
+          tmplId,
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      })
+    }
+    
+    return { code: 0, message: '订阅保存成功' }
+  } catch (err) {
+    console.error('保存订阅失败:', err)
+    return { code: -1, message: '保存订阅失败' }
+  }
 }
 
 // 格式化日期

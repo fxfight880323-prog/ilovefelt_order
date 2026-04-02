@@ -1,0 +1,102 @@
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="title">我的派单</view>
+    <view class="subtitle">管理您发布的所有订单</view>
+  </view>
+
+  <!-- Filter Tabs -->
+  <view class="filter-bar">
+    <view class="filter-item {{currentFilter === 'all' ? 'active' : ''}}" bindtap="switchFilter" data-filter="all">
+      全部
+    </view>
+    <view class="filter-item {{currentFilter === 'pending' ? 'active' : ''}}" bindtap="switchFilter" data-filter="pending">
+      待接单
+    </view>
+    <view class="filter-item {{currentFilter === 'accepted' ? 'active' : ''}}" bindtap="switchFilter" data-filter="accepted">
+      进行中
+    </view>
+    <view class="filter-item {{currentFilter === 'completed' ? 'active' : ''}}" bindtap="switchFilter" data-filter="completed">
+      已完成
+    </view>
+  </view>
+
+  <!-- Order List -->
+  <view class="order-list">
+    <block wx:if="{{orderList.length > 0}}">
+      <view class="order-card" wx:for="{{orderList}}" wx:key="_id">
+        <!-- Order Header -->
+        <view class="order-header">
+          <view class="order-code">#{{item.orderCode || item._id}}</view>
+          <view class="status-badge status-{{item.status}}">
+            {{item.status === 'pending' ? '待接单' : item.status === 'accepted' ? '进行中' : item.status === 'shipped' ? '已发货' : item.status === 'completed' ? '已完成' : '已关闭'}}
+          </view>
+        </view>
+
+        <!-- Order Info -->
+        <view class="order-info" bindtap="viewDetail" data-id="{{item._id}}">
+          <view class="info-row">
+            <text class="label">订单名称：</text>
+            <text class="value">{{item.name}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">样式：</text>
+            <text class="value">{{item.styleName}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">数量：</text>
+            <text class="value">{{item.quantity}} 件</text>
+          </view>
+          <view class="info-row">
+            <text class="label">总价：</text>
+            <text class="value price">¥{{item.totalPrice}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.craftsmanName}}">
+            <text class="label">接单人：</text>
+            <text class="value">{{item.craftsmanName}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">创建时间：</text>
+            <text class="value">{{item.createTime}}</text>
+          </view>
+        </view>
+
+        <!-- Order Actions -->
+        <view class="order-actions">
+          <!-- 待接单状态：可以编辑、删除 -->
+          <block wx:if="{{item.status === 'pending'}}">
+            <view class="action-btn btn-edit" bindtap="editOrder" data-id="{{item._id}}">修改</view>
+            <view class="action-btn btn-delete" bindtap="deleteOrder" data-id="{{item._id}}">删除</view>
+          </block>
+
+          <!-- 进行中状态：可以跟踪 -->
+          <block wx:if="{{item.status === 'accepted' || item.status === 'shipped'}}">
+            <view class="action-btn btn-track" bindtap="trackOrder" data-id="{{item._id}}">跟踪</view>
+            <view class="action-btn btn-contact" bindtap="contactCraftsman" data-id="{{item._id}}">联系手艺人</view>
+          </block>
+
+          <!-- 已完成状态：可以查看详情 -->
+          <block wx:if="{{item.status === 'completed'}}">
+            <view class="action-btn btn-view" bindtap="viewDetail" data-id="{{item._id}}">查看详情</view>
+            <view class="action-btn btn-rate" bindtap="rateCraftsman" data-id="{{item._id}}">评价</view>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <!-- Empty State -->
+    <view class="empty-state" wx:if="{{!loading && orderList.length === 0}}">
+      <view class="empty-icon">📭</view>
+      <view class="empty-text">暂无订单</view>
+      <view class="empty-desc">点击右下角按钮创建新订单</view>
+    </view>
+  </view>
+
+  <!-- Floating Action Button -->
+  <view class="fab" bindtap="goToCreateOrder">+</view>
+
+  <!-- Loading -->
+  <view class="loading-mask" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+  </view>
+</view>

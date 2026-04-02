@@ -1,0 +1,84 @@
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="title">联系管理员</view>
+    <view class="subtitle">如有问题，请联系管理员</view>
+  </view>
+
+  <!-- 联系方式卡片 -->
+  <view class="contact-card">
+    <view class="card-icon">👨‍💼</view>
+    <view class="card-title">平台管理员</view>
+    <view class="card-desc">负责平台运营、账号审核、问题处理</view>
+  </view>
+
+  <!-- 电话联系方式 -->
+  <view class="contact-section">
+    <view class="section-title">📞 电话联系</view>
+    <view class="contact-item" bindtap="callPhone">
+      <view class="item-left">
+        <view class="item-icon phone">📱</view>
+        <view class="item-info">
+          <view class="item-label">管理员电话</view>
+          <view class="item-value">13810062394</view>
+        </view>
+      </view>
+      <view class="item-action">拨打</view>
+    </view>
+  </view>
+
+  <!-- 微信联系方式 -->
+  <view class="contact-section">
+    <view class="section-title">💬 微信联系</view>
+    <view class="contact-item" bindtap="copyWechat">
+      <view class="item-left">
+        <view class="item-icon wechat">💬</view>
+        <view class="item-info">
+          <view class="item-label">管理员微信</view>
+          <view class="item-value">13810062394</view>
+          <view class="item-hint">微信号同手机号</view>
+        </view>
+      </view>
+      <view class="item-action">复制</view>
+    </view>
+  </view>
+
+  <!-- 服务时间 -->
+ <view class="service-time">
+    <view class="time-title">⏰ 服务时间</view>
+    <view class="time-content">
+      <view class="time-item">
+        <text class="time-label">工作日：</text>
+        <text class="time-value">9:00 - 18:00</text>
+      </view>
+      <view class="time-item">
+        <text class="time-label">周末及节假日：</text>
+        <text class="time-value">10:00 - 17:00</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 常见问题 -->
+  <view class="faq-section">
+    <view class="section-title">❓ 常见问题</view>
+    <view class="faq-list">
+      <view class="faq-item">
+        <view class="faq-q">注册后多久能审核通过？</view>
+        <view class="faq-a">一般情况下，管理员会在1-2个工作日内完成审核，请耐心等待。</view>
+      </view>
+      <view class="faq-item">
+        <view class="faq-q">可以注册多个角色吗？</view>
+        <view class="faq-a">一个手机号只能注册一个角色（派单人或手艺人）。</view>
+      </view>
+      <view class="faq-item">
+        <view class="faq-q">审核被拒绝怎么办？</view>
+        <view class="faq-a">请联系管理员了解具体原因，修改后可以重新申请。</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tips">
+    <text class="tips-text">感谢您的支持与配合</text>
+  </view>
+</view>

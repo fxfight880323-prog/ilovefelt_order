@@ -1,0 +1,138 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 用户信息 -->
+  <block wx:if="{{!loading && userInfo}}">
+    <!-- 用户卡片 -->
+    <view class="user-card">
+      <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" class="user-avatar" mode="aspectFill" binderror="onAvatarError"/>
+      <view wx:else class="user-avatar-placeholder">{{userInfo.name[0]}}</view>
+      <view class="user-name">
+        {{userInfo.name}}
+        <text class="user-code" wx:if="{{userInfo.code}}">({{userInfo.code}})</text>
+      </view>
+      <view class="user-role">
+        <text class="role-tag {{userType}}">{{userType === 'craftsman' ? '手艺人' : '派单人'}}</text>
+        <text class="status-tag {{userInfo.status}}">{{userInfo.status === 'active' ? '正常' : userInfo.status === 'pending' ? '待审核' : '已禁用'}}</text>
+      </view>
+    </view>
+
+    <!-- 标签栏 -->
+    <view class="tab-bar" wx:if="{{userType === 'craftsman'}}">
+      <view class="tab-item {{activeTab === 'info' ? 'active' : ''}}" bindtap="switchTab" data-tab="info">
+        基本信息
+      </view>
+      <view class="tab-item {{activeTab === 'works' ? 'active' : ''}}" bindtap="switchTab" data-tab="works">
+        工作记录
+      </view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="info-section" wx:if="{{activeTab === 'info' || userType === 'dispatcher'}}">
+      <view class="info-card">
+        <view class="card-title">基本信息</view>
+        <view class="info-list">
+          <view class="info-row">
+            <text class="info-label">姓名</text>
+            <text class="info-value">{{userInfo.name}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.code}}">
+            <text class="info-label">制作师代号</text>
+            <text class="info-value">{{userInfo.code}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.phone}}">
+            <text class="info-label">手机号</text>
+            <text class="info-value">{{userInfo.phone}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.wechatId}}">
+            <text class="info-label">微信号</text>
+            <text class="info-value">{{userInfo.wechatId}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.specialty}}">
+            <text class="info-label">擅长方向</text>
+            <text class="info-value">{{userInfo.specialty}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.experience}}">
+            <text class="info-label">从业经验</text>
+            <text class="info-value">{{userInfo.experience}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.address}}">
+            <text class="info-label">所在地区</text>
+            <text class="info-value">{{userInfo.address}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.company}}">
+            <text class="info-label">公司名称</text>
+            <text class="info-value">{{userInfo.company}}</text>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.starLevel}}">
+            <text class="info-label">星级</text>
+            <view class="info-value">
+              <text class="star {{index < userInfo.starLevel ? 'active' : ''}}" wx:for="{{5}}" wx:key="index">★</text>
+            </view>
+          </view>
+          <view class="info-row" wx:if="{{userInfo.performance}}">
+            <text class="info-label">履约情况</text>
+            <text class="info-value performance {{userInfo.performance === '优' ? 'good' : userInfo.performance === '差' ? 'bad' : 'normal'}}">{{userInfo.performance}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 统计信息 -->
+      <view class="info-card" wx:if="{{userType === 'craftsman'}}">
+        <view class="card-title">接单统计</view>
+        <view class="stats-grid">
+          <view class="stat-item">
+            <text class="stat-number">{{userInfo.totalOrders || 0}}</text>
+            <text class="stat-label">累计接单</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-number">{{userInfo.completedOrders || 0}}</text>
+            <text class="stat-label">已完成</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-number">{{userInfo.rating || 5.0}}</text>
+            <text class="stat-label">评分</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 工作记录 -->
+    <view class="works-section" wx:if="{{activeTab === 'works' && userType === 'craftsman'}}">
+      <view class="work-list" wx:if="{{workList.length > 0}}">
+        <view class="work-item" wx:for="{{workList}}" wx:key="_id">
+          <image wx:if="{{item.productImage}}" src="{{item.productImage}}" class="work-image" mode="aspectFill"/>
+          <view class="work-content">
+            <view class="work-header">
+              <text class="work-name">{{item.orderName}}</text>
+              <text class="work-status {{item.completionStatus}}">
+                {{item.completionStatus === 'completed' ? '已完成' : item.completionStatus === 'rework' ? '返工' : '库存'}}
+              </text>
+            </view>
+            <view class="work-info">
+              <text class="work-cost">成本：¥{{item.costPrice}}</text>
+              <text class="work-settlement">结算：¥{{item.settlementAmount}}</text>
+            </view>
+            <view class="work-date" wx:if="{{item.deliveryDate}}">
+              交货：{{item.deliveryDate}}
+            </view>
+            <view class="work-remarks" wx:if="{{item.remarks}}">
+              {{item.remarks}}
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="empty-state" wx:if="{{workList.length === 0}}">
+        <text class="empty-text">暂无工作记录</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 返回按钮 -->
+  <view class="action-area">
+    <view class="btn btn-primary" bindtap="goBack">返回</view>
+  </view>
+</view>

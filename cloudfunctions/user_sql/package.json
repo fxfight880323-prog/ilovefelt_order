@@ -1,0 +1,10 @@
+{
+  "name": "user_sql",
+  "version": "1.0.0",
+  "description": "User cloud function with SQL database",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest",
+    "mysql2": "^3.6.5"
+  }
+}

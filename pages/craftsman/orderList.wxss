@@ -1,0 +1,41 @@
+/* Sùyǎ Artisans - Order List Page Styles */
+
+/* Order Card Enhancement */
+.order-card {
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.order-card:active {
+  transform: translateY(4rpx);
+}
+
+/* Info Item */
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status Tag Enhancement */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: 9999rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+/* Empty state customization */
+.empty-state .btn {
+  min-width: 240rpx;
+}
+
+/* Notice bar enhancement */
+.notice-chip {
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: 8rpx 24rpx;
+  border-radius: 9999rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}

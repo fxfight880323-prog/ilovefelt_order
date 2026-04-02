@@ -1,0 +1,75 @@
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="title">合作手艺人</view>
+    <view class="subtitle">共 {{craftsmenList.length}} 位合作手艺人 (角色:{{userRole}})</view>
+  </view>
+
+  <!-- Search Bar -->
+  <view class="search-bar">
+    <input 
+      class="search-input" 
+      placeholder="搜索手艺人姓名"
+      value="{{keyword}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <view class="search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- Craftsmen List -->
+  <view class="craftsmen-list">
+    <block wx:if="{{filteredList.length > 0}}">
+      <view class="craftsman-card" wx:for="{{filteredList}}" wx:key="_id" bindtap="viewCraftsmanDetail" data-id="{{item._id}}">
+        <view class="craftsman-header">
+          <view class="avatar">{{item.name[0]}}</view>
+          <view class="craftsman-info">
+            <view class="name-row">
+              <text class="name">{{item.name}}</text>
+              <view class="rating-badge" wx:if="{{item.rating}}">
+                <text class="star">★</text>
+                <text>{{item.rating}}</text>
+              </view>
+            </view>
+            <view class="phone" wx:if="{{item.phone}}">{{item.phone}}</view>
+          </view>
+          <view class="arrow">›</view>
+        </view>
+        
+        <view class="stats-row">
+          <view class="stat-item">
+            <text class="stat-value">{{item.totalOrders || 0}}</text>
+            <text class="stat-label">总订单</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{item.completedOrders || 0}}</text>
+            <text class="stat-label">已完成</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{item.pendingOrders || 0}}</text>
+            <text class="stat-label">进行中</text>
+          </view>
+        </view>
+        
+        <view class="last-order" wx:if="{{item.lastOrderDate}}">
+          <text class="last-order-label">最近合作：</text>
+          <text class="last-order-date">{{item.lastOrderDate}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- Empty State -->
+    <view class="empty-state" wx:if="{{!loading && filteredList.length === 0}}">
+      <view class="empty-icon">👥</view>
+      <view class="empty-text">暂无合作手艺人</view>
+      <view class="empty-desc">您发布的订单被接单后，手艺人将显示在这里</view>
+    </view>
+  </view>
+
+  <!-- Loading -->
+  <view class="loading-mask" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+</view>

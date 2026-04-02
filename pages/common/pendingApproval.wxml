@@ -1,0 +1,121 @@
+<view class="container">
+  <!-- 审核中状态 -->
+  <block wx:if="{{status === 'pending'}}">
+    <view class="status-icon pending">⏳</view>
+    <view class="status-title">申请审核中</view>
+    <view class="status-desc">
+      您的{{roleName}}申请已提交
+      <text class="highlight">正在审核中</text>
+    </view>
+    <view class="info-card">
+      <view class="info-item">
+        <text class="info-label">申请角色</text>
+        <text class="info-value">{{roleName}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">申请时间</text>
+        <text class="info-value">{{applyTime}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">当前状态</text>
+        <text class="info-value status-pending">审核中</text>
+      </view>
+    </view>
+    <view class="tips">
+      <text class="tips-icon">💡</text>
+      <text class="tips-text">管理员将在 1-2 个工作日内完成审核，请耐心等待</text>
+    </view>
+    <view class="action-group">
+      <view class="action-btn primary" bindtap="goToLogin">返回登录</view>
+      <view class="action-btn secondary" bindtap="contactAdmin">联系管理员</view>
+    </view>
+  </block>
+
+  <!-- 已通过状态 -->
+  <block wx:if="{{status === 'active'}}">
+    <view class="status-icon success">✅</view>
+    <view class="status-title">审核通过</view>
+    <view class="status-desc">
+      恭喜您，您的{{roleName}}申请
+      <text class="highlight">已通过审核</text>
+    </view>
+    <view class="info-card">
+      <view class="info-item">
+        <text class="info-label">申请角色</text>
+        <text class="info-value">{{roleName}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">通过时间</text>
+        <text class="info-value">{{approveTime}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">当前状态</text>
+        <text class="info-value status-active">已通过</text>
+      </view>
+    </view>
+    <view class="tips success-tips">
+ <text class="tips-icon">🎉</text>
+      <text class="tips-text">您现在可以使用{{roleName}}功能了</text>
+    </view>
+    <view class="action-btn primary" bindtap="goToHome">进入首页</view>
+  </block>
+
+  <!-- 被拒绝状态 -->
+  <block wx:if="{{status === 'rejected'}}">
+    <view class="status-icon rejected">❌</view>
+    <view class="status-title">申请被拒绝</view>
+    <view class="status-desc">
+      很抱歉，您的{{roleName}}申请
+      <text class="highlight rejected-text">未通过审核</text>
+    </view>
+    <view class="info-card">
+      <view class="info-item">
+        <text class="info-label">申请角色</text>
+        <text class="info-value">{{roleName}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">拒绝时间</text>
+        <text class="info-value">{{approveTime}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">当前状态</text>
+        <text class="info-value status-rejected">已拒绝</text>
+      </view>
+      <view class="reject-reason" wx:if="{{rejectReason}}">
+        <text class="reason-label">拒绝原因</text>
+        <text class="reason-content">{{rejectReason}}</text>
+      </view>
+    </view>
+    <view class="tips warning-tips">
+      <text class="tips-icon">⚠️</text>
+      <text class="tips-text">您可以根据拒绝原因修改信息后重新申请</text>
+    </view>
+    <view class="action-group">
+      <view class="action-btn" bindtap="reapply">重新申请</view>
+      <view class="action-btn secondary" bindtap="contactAdmin">联系管理员</view>
+    </view>
+  </block>
+
+  <!-- 加载中 -->
+  <block wx:if="{{loading}}">
+    <view class="loading">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </block>
+
+  <!-- 无状态（默认显示审核中） -->
+  <block wx:if="{{!loading && !status}}">
+    <view class="status-icon pending">⏳</view>
+    <view class="status-title">申请已提交</view>
+    <view class="status-desc">
+      您的{{roleName}}申请已提交
+      <text class="highlight">正在审核中</text>
+    </view>
+    <view class="tips">
+      <text class="tips-icon">💡</text>
+      <text class="tips-text">管理员将在 1-2 个工作日内完成审核，请耐心等待</text>
+    </view>
+    <view class="action-btn" bindtap="contactAdmin">联系管理员</view>
+  </block>
+</view>

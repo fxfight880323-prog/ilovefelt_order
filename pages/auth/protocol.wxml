@@ -1,0 +1,65 @@
+<view class="container">
+  <view class="protocol-content">
+    <view class="title" wx:if="{{type === 'craftsman'}}">手艺人服务协议</view>
+    <view class="title" wx:else>派单人服务协议</view>
+
+    <view class="section">
+      <view class="section-title">一、服务内容</view>
+      <view class="section-text" wx:if="{{type === 'craftsman'}}">
+        1. 平台为您提供订单接收服务，您可以浏览并接取符合您专业技能的订单。
+        2. 您需要按照订单要求完成手工艺制作，并保证作品质量。
+        3. 平台将根据您的服务质量和用户评价进行星级评定。
+      </view>
+      <view class="section-text" wx:else>
+        1. 平台为您提供订单发布服务，您可以发布定制需求寻找合适的手艺人。
+        2. 您需要准确描述订单需求，并及时支付订单费用。
+        3. 您有权对手艺人的服务进行评价。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">二、用户责任</view>
+      <view class="section-text" wx:if="{{type === 'craftsman'}}">
+        1. 您保证提供的个人信息真实有效。
+        2. 您具备相应的专业技能，能够独立完成订单。
+        3. 您承诺按时完成订单，如遇特殊情况需及时与派单人沟通。
+        4. 您应妥善保管账号信息，不得转借他人使用。
+      </view>
+      <view class="section-text" wx:else>
+        1. 您保证提供的个人信息真实有效。
+        2. 您应准确描述订单需求，包括样式、尺寸、材质等要求。
+        3. 您应按照约定时间支付订单费用。
+        4. 您应尊重手艺人的劳动成果，不得恶意要求返工。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">三、隐私保护</view>
+      <view class="section-text">
+        1. 平台将严格保护您的个人信息，不会向第三方泄露。
+        2. 您的联系方式仅在订单交易过程中向对方展示。
+        3. 您同意平台在必要时使用您的信息进行身份验证。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">四、违规处理</view>
+      <view class="section-text">
+        1. 如发现虚假信息，平台有权冻结账号。
+        2. 如存在欺诈行为，平台将永久封禁账号并追究法律责任。
+        3. 如多次收到差评，平台将降低您的信用评级。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">五、协议变更</view>
+      <view class="section-text">
+        平台有权根据实际情况修改本协议，修改后的协议将在平台上公布。如您继续使用服务，视为同意修改后的协议。
+      </view>
+    </view>
+
+    <view class="footer">
+      <text>最后更新：2024年3月</text>
+    </view>
+  </view>
+</view>

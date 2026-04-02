@@ -1,0 +1,49 @@
+<view class="container">
+  <view class="header">
+    <text class="title">🔧 调试工具</text>
+    <text class="subtitle">快速诊断注册问题</text>
+  </view>
+
+  <!-- 状态显示 -->
+  <view class="card">
+    <view class="card-title">系统状态</view>
+    <scroll-view class="log-box" scroll-y>
+      <text class="log-text" wx:for="{{logs}}" wx:key="index">{{item}}</text>
+    </scroll-view>
+    <button class="btn btn-primary" bindtap="checkStatus">刷新状态</button>
+  </view>
+
+  <!-- 快速测试 -->
+  <view class="card">
+    <view class="card-title">快速注册测试</view>
+    <view class="form-item">
+      <text class="label">手机号</text>
+      <input class="input" type="number" maxlength="11" value="{{testPhone}}" bindinput="onPhoneInput" placeholder="输入手机号"/>
+    </view>
+    <view class="form-item">
+      <text class="label">验证码</text>
+      <input class="input" type="number" maxlength="6" value="{{testCode}}" bindinput="onCodeInput" placeholder="输入验证码"/>
+    </view>
+    <view class="btn-group">
+      <button class="btn btn-default" bindtap="testSendCode">获取验证码</button>
+      <button class="btn btn-success" bindtap="quickRegister">快速注册</button>
+    </view>
+  </view>
+
+  <!-- 工具按钮 -->
+  <view class="card">
+    <view class="card-title">工具</view>
+    <view class="tool-list">
+      <view class="tool-item" bindtap="clearData">
+        <text class="tool-icon">🗑️</text>
+        <text class="tool-text">清空本地数据</text>
+      </view>
+      <view class="tool-item" bindtap="viewCloudLogs">
+        <text class="tool-icon">📋</text>
+        <text class="tool-text">查看云函数日志</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn btn-default" bindtap="goBack">返回</button>
+</view>

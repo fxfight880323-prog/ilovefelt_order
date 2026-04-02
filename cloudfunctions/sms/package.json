@@ -1,0 +1,9 @@
+{
+  "name": "sms",
+  "version": "1.0.0",
+  "description": "短信验证码和管理员通知云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

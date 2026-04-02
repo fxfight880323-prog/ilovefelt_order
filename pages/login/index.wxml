@@ -1,0 +1,93 @@
+<view class="container">
+  <!-- Logo 区域 -->
+  <view class="logo-container">
+    <image class="logo" src="/images/logo.jpg" mode="aspectFit" />
+    <view class="brand-name">手工艺派单系统</view>
+    <view class="slogan">发现手工艺之美</view>
+  </view>
+
+  <!-- 加载动画 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">{{loadingText}}</text>
+    <view class="retry-btn" bindtap="showLoginButtons" wx:if="{{showRetry}}">
+      <text>点击重试</text>
+    </view>
+  </view>
+
+  <!-- 登录按钮区域 -->
+  <view class="login-container" wx:if="{{showLogin}}">
+    <view class="login-tips">
+      <text class="tips-text">{{loginMode === 'phone' ? '请输入手机号和密码' : '登录后可享受完整功能'}}</text>
+    </view>
+    
+    <!-- 手机号密码登录表单 -->
+    <view wx:if="{{loginMode === 'phone'}}" class="phone-login-form">
+      <view class="form-item">
+        <input 
+          class="input" 
+          placeholder="请输入手机号" 
+          type="number"
+          maxlength="11"
+          value="{{phone}}"
+          bindinput="onPhoneInput"
+        />
+      </view>
+      <view class="form-item">
+        <input 
+          class="input" 
+          placeholder="请输入密码" 
+          type="text"
+          password="{{true}}"
+          maxlength="20"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+      <button 
+        class="login-btn wechat-btn" 
+        bindtap="onPhoneLogin">
+        <text class="btn-text">登 录</text>
+      </button>
+      <view class="switch-mode" bindtap="switchLoginMode">
+        <text class="switch-text">使用微信登录 ></text>
+      </view>
+    </view>
+    
+    <!-- 微信登录按钮 -->
+    <view wx:else>
+      <button 
+        class="login-btn wechat-btn" 
+        bindtap="onWechatLogin">
+        <text class="btn-icon">📱</text>
+        <text class="btn-text">微信一键登录</text>
+      </button>
+      
+      <!-- 注册新账号 -->
+      <button class="login-btn register-btn" bindtap="goToRegister">
+        <text class="btn-icon">📝</text>
+        <text class="btn-text">注册新账号</text>
+      </button>
+      
+      <view class="switch-mode" bindtap="switchLoginMode">
+        <text class="switch-text">使用手机号密码登录 ></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 协议提示 -->
+  <view class="protocol-container" wx:if="{{showLogin}}">
+    <view class="protocol-wrapper">
+      <checkbox class="protocol-checkbox" checked="{{agreeProtocol}}" bindtap="toggleProtocol"/>
+      <view class="protocol-text-wrapper">
+        <text class="protocol-text">我已阅读并同意</text>
+        <text class="protocol-link" bindtap="viewProtocol">《用户服务协议》</text>
+        <text class="protocol-text">和</text>
+        <text class="protocol-link" bindtap="viewPrivacy">《隐私政策》</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 版本号 -->
+  <view class="version">Version 1.0.0</view>
+</view>

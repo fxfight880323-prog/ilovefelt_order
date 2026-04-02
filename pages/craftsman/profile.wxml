@@ -1,0 +1,201 @@
+<view class="container canvas-bg">
+  <!-- Profile Hero Section -->
+  <view class="profile-hero" wx:if="{{roleInfo}}">
+    <!-- Large Avatar -->
+    <view class="avatar-section">
+      <view style="position: relative; transform: rotate(-2deg);" bindtap="uploadAvatar">
+        <image 
+          class="avatar-main" 
+          src="{{roleInfo.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" 
+          mode="aspectFill"
+          binderror="onAvatarError"
+        />
+        <view class="avatar-badge-main">
+          <text style="font-size: 28rpx;">📷</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- User Info -->
+    <view style="text-align: center; margin-top: 40rpx;">
+      <view class="headline-lg" style="margin-bottom: 16rpx;">{{roleInfo.name}}</view>
+      <view wx:if="{{roleInfo.specialty}}" class="body-md text-on-surface-variant text-italic" style="margin-bottom: 24rpx; max-width: 500rpx; margin-left: auto; margin-right: auto;">
+        {{roleInfo.specialty}}
+      </view>
+      
+      <!-- Skill Tags -->
+      <view class="flex items-center justify-center gap-2" style="flex-wrap: wrap; margin-bottom: 32rpx;">
+        <view class="chip chip-primary">{{userRole === 'craftsman' ? '手艺人' : '派单人'}}</view>
+        <view wx:if="{{roleInfo.specialty}}" class="chip chip-secondary">{{roleInfo.specialty}}</view>
+        <view class="chip chip-outline">认证用户</view>
+      </view>
+      
+      <!-- Stats Row - 手艺人 -->
+      <view class="stats-row" wx:if="{{userRole === 'craftsman'}}">
+        <view class="stat-block stat-block-clickable" bindtap="showReliabilityRules">
+          <view class="stat-value" style="color: {{stats.reliabilityColor || '#52c41a'}};">{{stats.reliabilityScore || '5.0'}}</view>
+          <view class="stat-label">{{stats.reliabilityLevel || '优秀'}}</view>
+          <view class="stat-sublabel" style="font-size: 20rpx; color: var(--outline);">履约分</view>
+        </view>
+        <view class="stat-block stat-block-clickable" bindtap="goToMyOrders" data-status="accepted">
+          <view class="stat-value">{{stats.totalOrders || roleInfo.totalOrders || 0}}</view>
+          <view class="stat-label">进行中</view>
+        </view>
+        <view class="stat-block stat-block-clickable" bindtap="goToMyOrders" data-status="shipped">
+          <view class="stat-value">{{stats.shippedOrders || 0}}</view>
+          <view class="stat-label">已发货</view>
+        </view>
+        <view class="stat-block stat-block-clickable" bindtap="goToMyOrders" data-status="completed">
+          <view class="stat-value">{{stats.completedOrders || roleInfo.completedOrders || 0}}</view>
+          <view class="stat-label">已完成</view>
+        </view>
+      </view>
+      
+      <!-- 履约分进度条 - 手艺人 -->
+      <view class="reliability-section" wx:if="{{userRole === 'craftsman'}}" style="margin-top: 32rpx; padding: 0 32rpx;">
+        <view class="flex items-center justify-between" style="margin-bottom: 12rpx;">
+          <text class="body-sm" style="color: var(--on-surface-variant);">综合履约分</text>
+          <text class="body-sm" style="color: {{stats.reliabilityColor || '#52c41a'}}; font-weight: 600;">{{stats.reliabilityScore || '5.0'}}/6.0</text>
+        </view>
+        <view class="progress-bar-bg" style="height: 12rpx; background: var(--surface-container-highest); border-radius: 6rpx; overflow: hidden;">
+          <view class="progress-bar-fill" style="width: {{reliabilityInfo.progress || 83}}%; height: 100%; background: linear-gradient(90deg, {{stats.reliabilityColor || '#52c41a'}}, {{stats.reliabilityColor || '#52c41a'}}aa); border-radius: 6rpx; transition: width 0.5s ease;"></view>
+        </view>
+        <view class="flex items-center justify-between" style="margin-top: 12rpx;">
+          <text class="caption" style="color: var(--outline);">0分</text>
+          <text class="caption" style="color: var(--outline);">危险</text>
+          <text class="caption" style="color: var(--outline);">警告</text>
+          <text class="caption" style="color: var(--outline);">中等</text>
+          <text class="caption" style="color: var(--outline);">优秀</text>
+          <text class="caption" style="color: var(--outline);">6分</text>
+        </view>
+        
+        <!-- 履约分明细 -->
+        <view style="margin-top: 24rpx; padding: 20rpx; background: var(--surface-container-lowest); border-radius: 12rpx;">
+          <view class="flex items-center justify-between" style="margin-bottom: 16rpx;">
+            <text class="body-sm" style="color: var(--on-surface-variant); font-weight: 500;">履约分明细</text>
+            <text class="caption" style="color: var(--outline);">已评价 {{stats.ratedOrders || 0}} 单</text>
+          </view>
+          <view class="flex items-center" style="margin-bottom: 12rpx;">
+            <text class="caption" style="color: var(--on-surface-variant); width: 140rpx;">时间履约</text>
+            <text class="body-sm" style="color: #52c41a; font-weight: 600; margin-left: 16rpx;">{{stats.avgTimeScore || '5.0'}}分</text>
+            <text class="caption" style="color: var(--outline); margin-left: 8rpx;">× 50%</text>
+          </view>
+          <view class="flex items-center">
+            <text class="caption" style="color: var(--on-surface-variant); width: 140rpx;">派单评分</text>
+            <text class="body-sm" style="color: #1890ff; font-weight: 600; margin-left: 16rpx;">{{stats.avgRatingScore || '5.0'}}分</text>
+            <text class="caption" style="color: var(--outline); margin-left: 8rpx;">× 50%</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Dispatcher Stats -->
+      <view class="stats-row" wx:if="{{userRole === 'dispatcher'}}">
+        <view class="stat-block">
+          <view class="stat-value">{{stats.totalOrders || 0}}</view>
+          <view class="stat-label">总订单</view>
+        </view>
+        <view class="stat-block stat-block-clickable" bindtap="goToMyOrders" data-status="accepted">
+          <view class="stat-value">{{stats.pendingCount || 0}}</view>
+          <view class="stat-label">进行中</view>
+        </view>
+        <view class="stat-block stat-block-clickable" bindtap="goToMyOrders" data-status="completed">
+          <view class="stat-value">{{stats.completedCount || 0}}</view>
+          <view class="stat-label">已完成</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Performance Section -->
+  <view class="card card-secondary" wx:if="{{roleInfo && roleInfo.performance}}">
+    <view class="flex items-center gap-3" style="margin-bottom: 16rpx;">
+      <view style="font-size: 36rpx;">⭐</view>
+      <view class="title-md">履约情况</view>
+    </view>
+    <view class="body-lg" style="color: var(--on-surface-variant);">{{roleInfo.performance}}</view>
+  </view>
+
+  <!-- Atelier Settings -->
+  <view class="section-header" style="margin-top: 48rpx;">
+    <view class="section-title">工作室设置</view>
+  </view>
+  
+  <view class="card" style="padding: 16rpx;">
+    <view class="menu-list">
+      <!-- Subscribe -->
+      <view class="menu-item" bindtap="updateSubscribe">
+        <view class="menu-icon-wrap">
+          <view class="menu-icon-inner" style="background: var(--tertiary-fixed); color: var(--on-tertiary-fixed);">🔔</view>
+        </view>
+        <view class="menu-content">
+          <view class="menu-title">消息提醒</view>
+          <view class="menu-desc">订阅订单状态变更通知</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+      
+      <view class="divider" style="margin: 8rpx 0;"></view>
+      
+      <!-- Contact Admin -->
+      <view class="menu-item" bindtap="contactAdmin">
+        <view class="menu-icon-wrap">
+          <view class="menu-icon-inner" style="background: var(--primary-fixed); color: var(--on-primary-fixed);">📞</view>
+        </view>
+        <view class="menu-content">
+          <view class="menu-title">联系管理员</view>
+          <view class="menu-desc">有问题联系平台管理员</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+      
+      <view class="divider" style="margin: 8rpx 0;"></view>
+      
+      <!-- Help -->
+      <view class="menu-item" bindtap="viewHelp">
+        <view class="menu-icon-wrap">
+          <view class="menu-icon-inner" style="background: var(--secondary-fixed); color: var(--on-secondary-fixed);">❓</view>
+        </view>
+        <view class="menu-content">
+          <view class="menu-title">使用帮助</view>
+          <view class="menu-desc">查看使用说明和常见问题</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+      
+      <view class="divider" style="margin: 8rpx 0;"></view>
+      
+      <!-- Switch Role -->
+      <view class="menu-item" bindtap="switchRole">
+        <view class="menu-icon-wrap">
+          <view class="menu-icon-inner" style="background: var(--surface-container-highest); color: var(--primary);">🔄</view>
+        </view>
+        <view class="menu-content">
+          <view class="menu-title">切换角色</view>
+          <view class="menu-desc">在手艺人/派单人间切换</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+      
+      <view class="divider" style="margin: 8rpx 0;"></view>
+      
+      <!-- Logout -->
+      <view class="menu-item" bindtap="logout" style="color: var(--error);">
+        <view class="menu-icon-wrap">
+          <view class="menu-icon-inner" style="background: var(--error-container); color: var(--error);">🚪</view>
+        </view>
+        <view class="menu-content">
+          <view class="menu-title" style="color: var(--error);">退出登录</view>
+          <view class="menu-desc">安全退出当前账号</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Version Info -->
+  <view style="text-align: center; padding: 48rpx; color: var(--outline); font-size: 24rpx;">
+    <text>手工艺派单系统 v1.0.0</text>
+  </view>
+  
+  <!-- Bottom Spacer -->
+  <view style="height: 40rpx;"></view>
+</view>

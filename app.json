@@ -1,0 +1,88 @@
+{
+  "pages": [
+    "pages/login/index",
+    "pages/auth/roleSelect",
+    "pages/auth/craftsmanRegister",
+    "pages/auth/dispatcherAuth",
+    "pages/auth/protocol",
+    "pages/common/index",
+    "pages/common/statistics",
+    "pages/common/contactAdmin",
+    "pages/common/pendingApproval",
+    "pages/dispatcher/myOrders",
+    "pages/dispatcher/orderTrack",
+    "pages/dispatcher/orderDetail",
+    "pages/dispatcher/rateCraftsman",
+    "pages/dispatcher/craftsmen",
+    "pages/dispatcher/craftsmanOrders",
+    "pages/admin/console",
+    "pages/admin/orderManage",
+    "pages/admin/styleManage",
+    "pages/admin/orderForm",
+    "pages/admin/userDetail",
+    "pages/admin/stats/index",
+    "pages/admin/initDb",
+    "pages/admin/debug",
+    "pages/craftsman/orderList",
+    "pages/craftsman/orderDetail",
+    "pages/craftsman/profile",
+    "pages/craftsman/myOrders"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#fcf9f4",
+    "navigationBarTitleText": "素雅派单",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#7f756c",
+    "selectedColor": "#6c5842",
+    "backgroundColor": "#fcf9f4",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/common/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/craftsman/orderList",
+        "text": "接单",
+        "iconPath": "images/order.png",
+        "selectedIconPath": "images/order-active.png"
+      },
+      {
+        "pagePath": "pages/craftsman/myOrders",
+        "text": "我的订单",
+        "iconPath": "images/my-order.png",
+        "selectedIconPath": "images/my-order-active.png"
+      },
+      {
+        "pagePath": "pages/dispatcher/myOrders",
+        "text": "派单",
+        "iconPath": "images/order.png",
+        "selectedIconPath": "images/order-active.png"
+      },
+      {
+        "pagePath": "pages/dispatcher/craftsmen",
+        "text": "手艺人",
+        "iconPath": "images/my-order.png",
+        "selectedIconPath": "images/my-order-active.png"
+      },
+      {
+        "pagePath": "pages/craftsman/profile",
+        "text": "个人中心",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png"
+      }
+    ]
+  },
+  "cloud": true,
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "useExtendedLib": {
+    "weui": true
+  }
+}

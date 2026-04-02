@@ -1,0 +1,19 @@
+<!-- 测试页面 - 复制到任意页面使用 -->
+<view class="container">
+  <view class="header">系统测试</view>
+  
+  <button type="primary" bindtap="runFullTest" loading="{{testing}}">
+    {{testing ? '测试中...' : '运行完整测试'}}
+  </button>
+  
+  <view wx:if="{{testResults}}" class="results">
+    <view class="summary">
+      <text class="pass">✅ 通过: {{testResults.passed}}</text>
+      <text class="fail">❌ 失败: {{testResults.failed}}</text>
+    </view>
+    
+    <view wx:for="{{testResults.tests}}" wx:key="index" class="test-item {{item.status}}">
+      {{item.status === 'passed' ? '✅' : '❌'}} {{item.name}}: {{item.msg}}
+    </view>
+  </view>
+</view>

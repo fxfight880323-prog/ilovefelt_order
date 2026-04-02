@@ -1,0 +1,281 @@
+<view class="container" wx:if="{{isAdmin}}">
+  <!-- 统计卡片 -->
+  <view class="stats-section">
+    <view class="stats-card">
+      <view class="stat-item">
+        <text class="stat-number">{{stats.craftsmanCount}}</text>
+        <text class="stat-label">手艺人</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{stats.dispatcherCount}}</text>
+        <text class="stat-label">派单人</text>
+      </view>
+      <view class="stat-item highlight">
+        <text class="stat-number">{{stats.pendingCount}}</text>
+        <text class="stat-label">待审核</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签栏 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'craftsman' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="craftsman">
+      <text>手艺人</text>
+      <view class="tab-badge" wx:if="{{stats.craftsmanCount > 0}}">{{stats.craftsmanCount}}</view>
+    </view>
+    <view class="tab-item {{activeTab === 'dispatcher' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="dispatcher">
+      <text>派单人</text>
+      <view class="tab-badge" wx:if="{{stats.dispatcherCount > 0}}">{{stats.dispatcherCount}}</view>
+    </view>
+    <view class="tab-item {{activeTab === 'verify' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="verify">
+      <text>待审核</text>
+      <view class="tab-badge red" wx:if="{{stats.pendingCount > 0}}">{{stats.pendingCount}}</view>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" 
+             placeholder="搜索姓名或手机号" 
+             bindconfirm="onSearch"/>
+    </view>
+  </view>
+
+  <!-- 手艺人列表 -->
+  <view class="list-section" wx:if="{{activeTab === 'craftsman'}}">
+    <block wx:if="{{craftsmanList.length > 0}}">
+      <view class="user-card" wx:for="{{craftsmanList}}" wx:key="_id">
+        <view class="user-header">
+          <view class="user-info">
+            <text class="user-name">{{item.name}}</text>
+            <view class="user-tags">
+              <text class="tag tag-craftsman">手艺人</text>
+              <text class="tag tag-star" wx:if="{{item.starLevel}}">{{item.starLevel}}星</text>
+              <text class="tag tag-status {{item.status === 'active' ? 'active' : 'pending'}}">
+                {{item.status === 'active' ? '已通过' : '待审核'}}
+              </text>
+            </view>
+          </view>
+          <view class="user-phone">{{item.phone}}</view>
+        </view>
+        <view class="user-detail">
+          <text class="detail-item">擅长：{{item.specialty || '未填写'}}</text>
+          <text class="detail-item">经验：{{item.experience || '未填写'}}</text>
+          <text class="detail-item">地区：{{item.address || '未填写'}}</text>
+        </view>
+        <view class="user-actions">
+          <button class="action-btn btn-view" 
+                  catchtap="viewDetail" 
+                  data-id="{{item._id}}" 
+                  data-type="craftsman">查看</button>
+          <button class="action-btn btn-edit" 
+                  catchtap="showEditModal" 
+                  data-id="{{item._id}}" 
+                  data-type="craftsman">编辑</button>
+          <button class="action-btn btn-delete" 
+                  catchtap="deleteCraftsman" 
+                  data-id="{{item._id}}" 
+                  data-name="{{item.name}}">删除</button>
+        </view>
+      </view>
+    </block>
+    <view class="empty-state" wx:else>
+      <text class="empty-icon">👨‍🎨</text>
+      <text class="empty-text">暂无手艺人</text>
+    </view>
+  </view>
+
+  <!-- 派单人列表 -->
+  <view class="list-section" wx:if="{{activeTab === 'dispatcher'}}">
+    <block wx:if="{{dispatcherList.length > 0}}">
+      <view class="user-card" wx:for="{{dispatcherList}}" wx:key="_id">
+        <view class="user-header">
+          <view class="user-info">
+            <text class="user-name">{{item.name}}</text>
+            <view class="user-tags">
+              <text class="tag tag-dispatcher">派单人</text>
+              <text class="tag tag-status active">已通过</text>
+            </view>
+          </view>
+          <view class="user-phone">{{item.phone}}</view>
+        </view>
+        <view class="user-detail">
+          <text class="detail-item">公司：{{item.company || '未填写'}}</text>
+          <text class="detail-item">注册时间：{{item.createTime}}</text>
+        </view>
+        <view class="user-actions">
+          <button class="action-btn btn-view" 
+                  catchtap="viewDetail" 
+                  data-id="{{item._id}}" 
+                  data-type="dispatcher">查看</button>
+          <button class="action-btn btn-edit" 
+                  catchtap="showEditModal" 
+                  data-id="{{item._id}}" 
+                  data-type="dispatcher">编辑</button>
+          <button class="action-btn btn-delete" 
+                  catchtap="deleteDispatcher" 
+                  data-id="{{item._id}}" 
+                  data-name="{{item.name}}">删除</button>
+        </view>
+      </view>
+    </block>
+    <view class="empty-state" wx:else>
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无派单人</text>
+    </view>
+  </view>
+
+  <!-- 待审核列表 -->
+  <view class="list-section" wx:if="{{activeTab === 'verify'}}">
+    <!-- 筛选标签 -->
+    <view class="filter-tabs" wx:if="{{pendingList.length > 0}}">
+      <view class="filter-tab {{pendingFilter === 'all' ? 'active' : ''}}" bindtap="switchPendingFilter" data-filter="all">
+        全部({{pendingList.length}})
+      </view>
+      <view class="filter-tab {{pendingFilter === 'craftsman' ? 'active' : ''}}" bindtap="switchPendingFilter" data-filter="craftsman">
+        手艺人({{pendingCraftsmanCount}})
+      </view>
+      <view class="filter-tab {{pendingFilter === 'dispatcher' ? 'active' : ''}}" bindtap="switchPendingFilter" data-filter="dispatcher">
+        派单人({{pendingDispatcherCount}})
+      </view>
+    </view>
+
+    <block wx:if="{{filteredPendingList.length > 0}}">
+      <view class="user-card pending" wx:for="{{filteredPendingList}}" wx:key="_id">
+        <view class="user-header">
+          <view class="user-info">
+            <text class="user-name">{{item.name}}</text>
+            <view class="user-tags">
+              <text class="tag tag-{{item.role}}">{{item.role === 'craftsman' ? '手艺人' : '派单人'}}</text>
+              <text class="tag tag-status pending">待审核</text>
+            </view>
+          </view>
+          <view class="user-phone">{{item.phone}}</view>
+        </view>
+        <view class="user-detail" wx:if="{{item.role === 'craftsman'}}">
+          <text class="detail-item">擅长：{{item.applyData.specialty || '未填写'}}</text>
+          <text class="detail-item">经验：{{item.applyData.experience || '未填写'}}</text>
+          <text class="detail-item">地区：{{item.applyData.address || '未填写'}}</text>
+          <text class="detail-item">微信号：{{item.applyData.wechatId || '未填写'}}</text>
+        </view>
+        <view class="user-detail" wx:if="{{item.role === 'dispatcher'}}">
+          <text class="detail-item">公司：{{item.applyData.company || '未填写'}}</text>
+          <text class="detail-item">经验：{{item.applyData.experience || '未填写'}}</text>
+          <text class="detail-item">微信号：{{item.applyData.wechatId || '未填写'}}</text>
+        </view>
+        <view class="user-actions">
+          <button class="action-btn btn-approve" 
+                  catchtap="reviewApplication" 
+                  data-id="{{item._id}}" 
+                  data-type="{{item.role}}"
+                  data-action="approve">通过</button>
+          <button class="action-btn btn-reject" 
+                  catchtap="reviewApplication" 
+                  data-id="{{item._id}}" 
+                  data-type="{{item.role}}"
+                  data-action="reject">拒绝</button>
+        </view>
+      </view>
+    </block>
+    <view class="empty-state" wx:else>
+      <text class="empty-icon">✅</text>
+      <text class="empty-text">暂无待审核申请</text>
+    </view>
+  </view>
+
+  <!-- 系统管理 -->
+  <view class="system-section">
+    <view class="section-title">系统管理</view>
+    <view class="menu-grid">
+      <view class="menu-item" bindtap="goToInitDb">
+        <view class="menu-icon">🗄️</view>
+        <view class="menu-text">数据库初始化</view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 编辑弹窗 -->
+<view class="modal" wx:if="{{showEditModal}}" bindtap="closeEditModal">
+  <view class="modal-content" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">编辑{{editType === 'craftsman' ? '手艺人' : '派单人'}}</text>
+      <view class="modal-close" bindtap="closeEditModal">×</view>
+    </view>
+    <view class="modal-body">
+      <!-- 姓名 -->
+      <view class="form-item">
+        <text class="form-label required">姓名</text>
+        <input class="form-input" placeholder="请输入姓名" value="{{editForm.name}}" bindinput="onEditInput" data-field="name"/>
+      </view>
+      <!-- 手机号 -->
+      <view class="form-item">
+        <text class="form-label">手机号</text>
+        <input class="form-input" type="number" placeholder="请输入手机号" value="{{editForm.phone}}" bindinput="onEditInput" data-field="phone" maxlength="11"/>
+      </view>
+      <!-- 微信号 -->
+      <view class="form-item">
+        <text class="form-label">微信号</text>
+        <input class="form-input" placeholder="请输入微信号" value="{{editForm.wechatId}}" bindinput="onEditInput" data-field="wechatId"/>
+      </view>
+      <!-- 手艺人专属字段 -->
+      <block wx:if="{{editType === 'craftsman'}}">
+        <!-- 制作师代号 -->
+        <view class="form-item">
+          <text class="form-label">制作师代号</text>
+          <input class="form-input" placeholder="如：A001" value="{{editForm.code}}" bindinput="onEditInput" data-field="code"/>
+        </view>
+        <!-- 星级 -->
+        <view class="form-item">
+          <text class="form-label">星级</text>
+          <view class="star-selector">
+            <text class="star {{index < editForm.starLevel ? 'active' : ''}}" wx:for="{{5}}" wx:key="index" bindtap="selectStar" data-level="{{index + 1}}">★</text>
+          </view>
+          <text class="star-text">{{editForm.starLevel}} 星</text>
+        </view>
+        <!-- 擅长方向 -->
+        <view class="form-item">
+          <text class="form-label">擅长方向</text>
+          <input class="form-input" placeholder="如：刺绣、编织" value="{{editForm.specialty}}" bindinput="onEditInput" data-field="specialty"/>
+        </view>
+        <!-- 履约情况 -->
+        <view class="form-item">
+          <text class="form-label">履约情况</text>
+          <view class="performance-options">
+            <view class="performance-option {{editForm.performance === '优' ? 'active' : ''}}" bindtap="selectPerformance" data-value="优">
+              <text class="performance-dot good"></text>
+              <text>优</text>
+            </view>
+            <view class="performance-option {{editForm.performance === '中' ? 'active' : ''}}" bindtap="selectPerformance" data-value="中">
+              <text class="performance-option-dot normal"></text>
+              <text>中</text>
+            </view>
+            <view class="performance-option {{editForm.performance === '差' ? 'active' : ''}}" bindtap="selectPerformance" data-value="差">
+              <text class="performance-option-dot bad"></text>
+              <text>差</text>
+            </view>
+          </view>
+        </view>
+      </block>
+      <!-- 派单人专属字段 -->
+      <block wx:if="{{editType === 'dispatcher'}}">
+        <view class="form-item">
+          <text class="form-label">公司名称</text>
+          <input class="form-input" placeholder="请输入公司名称" value="{{editForm.company}}" bindinput="onEditInput" data-field="company"/>
+        </view>
+      </block>
+    </view>
+    <view class="modal-footer">
+      <button class="btn btn-default" bindtap="closeEditModal">取消</button>
+      <button class="btn btn-primary" bindtap="saveEdit">保存</button>
+    </view>
+  </view>
+</view>

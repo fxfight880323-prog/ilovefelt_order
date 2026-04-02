@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="header">
+    <view class="title">评价手艺人</view>
+    <view class="subtitle">请对本次服务进行评价</view>
+  </view>
+
+  <view class="card" wx:if="{{orderInfo}}">
+    <!-- 订单信息 -->
+    <view class="order-info">
+      <view class="info-row">
+        <text class="label">订单名称：</text>
+        <text class="value">{{orderInfo.name}}</text>
+      </view>
+      <view class="info-row">
+        <text class="label">手艺人：</text>
+        <text class="value">{{orderInfo.craftsmanName}}</text>
+      </view>
+    </view>
+
+    <!-- 星级评分 -->
+    <view class="rating-section">
+      <view class="section-title">服务态度</view>
+      <view class="star-container">
+        <text 
+          wx:for="{{5}}" 
+          wx:key="index"
+          class="star {{index < rating ? 'active' : ''}}"
+          bindtap="setRating"
+          data-score="{{index + 1}}"
+        >★</text>
+      </view>
+      <view class="rating-text">{{ratingText}}</view>
+    </view>
+
+    <!-- 评价内容 -->
+    <view class="comment-section">
+      <view class="section-title">评价内容（选填）</view>
+      <textarea 
+        class="comment-input"
+        placeholder="请输入您的评价..."
+        maxlength="200"
+        value="{{comment}}"
+        bindinput="onCommentInput"
+      />
+      <view class="char-count">{{comment.length}}/200</view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button class="submit-btn {{rating > 0 ? '' : 'disabled'}}" bindtap="submitRating" disabled="{{rating === 0 || submitting}}">
+      {{submitting ? '提交中...' : '提交评价'}}
+    </button>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+</view>

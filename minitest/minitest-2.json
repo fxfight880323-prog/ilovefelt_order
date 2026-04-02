@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "caseId": "4597c70f-84ad-48ba-b055-83d06975aa99",
+    "caseName": "minitest-2",
+    "remarks": "",
+    "version": "0.0.1",
+    "startTime": 1775018834728,
+    "endTime": 1775018843792,
+    "appid": "wx19302c485b354857",
+    "casePath": "",
+    "caseType": "normal",
+    "commonParams": [
+      {
+        "key": "1775018843820",
+        "name": "",
+        "value": ""
+      }
+    ]
+  },
+  "env": {
+    "wxapplibVersion": "3.15.0",
+    "devtoolsVersion": "2.01.2510280",
+    "openid": "o6zAJs5tZiykwoopcFfbedyjw81M",
+    "entry": {
+      "query": "",
+      "scene": 1001
+    },
+    "mock": [
+      "none"
+    ],
+    "maxWaitFor": 10000,
+    "ignoreSelectors": [],
+    "mockAPIs": [],
+    "cleanCache": [
+      "none"
+    ],
+    "groupTouch": false,
+    "replaySetting": {
+      "screenshot": "none"
+    },
+    "simulatorType": "wechat",
+    "device": "iPhone 15 Pro Max",
+    "recordAPIs": []
+  },
+  "commands": [
+    {
+      "layer": "tool",
+      "commandType": "operate",
+      "command": "startRecord",
+      "waitfor": 0,
+      "timeStamp": 1775018834728,
+      "desc": ""
+    },
+    {
+      "timeStamp": 9064,
+      "waitfor": 9064,
+      "desc": "",
+      "layer": "tool",
+      "commandType": "operate",
+      "command": "stopRecord"
+    }
+  ]
+}

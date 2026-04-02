@@ -1,5 +1,9 @@
 {
   "permissions": {
-    "openapi": []
+    "openapi": [
+      "subscribeMessage.send",  
+      "security.msgSecCheck",  
+      "cloudbase.sendSms"      
+    ]
   }
 }

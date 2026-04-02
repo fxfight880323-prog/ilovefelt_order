@@ -1,0 +1,179 @@
+<view class="container">
+  <view class="auth-header">
+    <text class="title">派单人认证</text>
+    <text class="subtitle">成为派单人，发布订单寻找手艺人</text>
+  </view>
+
+  <!-- 提示 -->
+  <view class="tip-bar" wx:if="{{showTip}}">
+    <text class="tip-icon">💡</text>
+    <text class="tip-text">需要验证码才能注册派单人</text>
+  </view>
+
+  <view class="form-container">
+    <!-- 认证信息 -->
+    <view class="form-section">
+      <view class="section-title">
+        <text class="icon">🔐</text>
+        <text>身份认证</text>
+      </view>
+      
+      <view class="form-item">
+        <text class="label required">手机号</text>
+        <input 
+          class="input" 
+          placeholder="请输入手机号" 
+          type="number"
+          maxlength="11"
+          value="{{form.phone}}"
+          data-field="phone"
+          bindinput="onInput"
+        />
+      </view>
+
+      <!-- 验证码 -->
+      <view class="form-item">
+        <text class="label required">验证码</text>
+        <view class="verify-code-wrapper">
+          <input 
+            class="input verify-input" 
+            placeholder="请输入验证码" 
+            type="number"
+            maxlength="6"
+            value="{{form.verifyCode}}"
+            data-field="verifyCode"
+            bindinput="onInput"
+          />
+          <button 
+            class="send-code-btn {{canSendCode ? '' : 'disabled'}}" 
+            bindtap="sendVerifyCode"
+            disabled="{{!canSendCode}}"
+          >
+            {{countdown > 0 ? countdown + 's' : '获取验证码'}}
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 个人信息 -->
+    <view class="form-section">
+      <view class="section-title">
+        <text class="icon">👤</text>
+        <text>个人信息</text>
+      </view>
+      
+      <view class="form-item">
+        <text class="label required">姓名</text>
+        <input 
+          class="input" 
+          placeholder="请输入真实姓名" 
+          value="{{form.name}}"
+          data-field="name"
+          bindinput="onInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">公司名称</text>
+        <input 
+          class="input" 
+          placeholder="请输入公司名称（选填）" 
+          value="{{form.company}}"
+          data-field="company"
+          bindinput="onInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label required">登录密码</text>
+        <input 
+          class="input" 
+          placeholder="请设置6-20位密码" 
+          type="text"
+          password="{{true}}"
+          maxlength="20"
+          value="{{form.password}}"
+          data-field="password"
+          bindinput="onInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label required">确认密码</text>
+        <input 
+          class="input" 
+          placeholder="请再次输入密码" 
+          type="text"
+          password="{{true}}"
+          maxlength="20"
+          value="{{form.confirmPassword}}"
+          data-field="confirmPassword"
+          bindinput="onInput"
+        />
+      </view>
+    </view>
+
+    <!-- 功能介绍 -->
+    <view class="feature-section">
+      <view class="section-title">派单人特权</view>
+      <view class="feature-list">
+        <view class="feature-item">
+          <text class="feature-icon">📋</text>
+          <view class="feature-info">
+            <text class="feature-name">发布订单</text>
+            <text class="feature-desc">发布定制需求，寻找合适的手艺人</text>
+          </view>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">👥</text>
+          <view class="feature-info">
+            <text class="feature-name">管理订单</text>
+            <text class="feature-desc">查看订单进度，与手艺人沟通</text>
+          </view>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">⭐</text>
+          <view class="feature-info">
+            <text class="feature-name">评价手艺人</text>
+            <text class="feature-desc">完成订单后评价手艺人服务质量</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 协议 -->
+    <view class="protocol-section">
+      <checkbox-group bindchange="onAgreeChange">
+        <label class="protocol-label">
+          <checkbox value="agree" checked="{{agreeProtocol}}"/>
+          <text class="protocol-text">我已阅读并同意</text>
+          <text class="protocol-link" bindtap="viewProtocol">《派单人服务协议》</text>
+        </label>
+      </checkbox-group>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button 
+      class="submit-btn {{loading ? 'loading' : ''}}" 
+      bindtap="submitAuth"
+      disabled="{{loading}}"
+    >
+      {{loading ? '认证中...' : '立即认证'}}
+    </button>
+
+    <view class="tips">
+      <text class="tip-text">提交后需要管理员审核通过</text>
+    </view>
+
+    <!-- 联系管理员 -->
+    <view class="contact-section" bindtap="goToContactAdmin">
+      <text class="contact-icon">📞</text>
+      <text class="contact-text">遇到问题？联系管理员：13810062394</text>
+      <text class="contact-arrow">></text>
+    </view>
+
+    <view class="back-link" bindtap="goBack">
+      <text>返回角色选择</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,114 @@
+<view class="container canvas-bg">
+  <!-- Unregistered State -->
+  <view class="card" wx:if="{{!craftsmanInfo}}">
+    <view class="empty-state">
+      <view style="width: 160rpx; height: 160rpx; background: var(--surface-container); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 32rpx;">
+        <text style="font-size: 80rpx; opacity: 0.6;">📝</text>
+      </view>
+      <view class="empty-text">您还未注册成为手工艺人</view>
+      <view class="empty-desc">请联系管理员进行注册</view>
+    </view>
+  </view>
+
+  <block wx:if="{{craftsmanInfo}}">
+    <!-- Header -->
+    <view class="section-header" style="padding-top: 20rpx;">
+      <view class="headline-md">我的任务</view>
+    </view>
+
+    <!-- Status Tabs -->
+    <view class="card" style="padding: 12rpx; margin-bottom: 32rpx;">
+      <view style="display: flex; background: var(--surface-container); border-radius: 16rpx; padding: 8rpx;">
+        <view 
+          class="tab-item {{currentStatus === item.value ? 'active' : ''}}"
+          wx:for="{{statusOptions}}"
+          wx:key="value"
+          data-status="{{item.value}}"
+          bindtap="switchStatus"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- Order List -->
+    <view class="list" style="gap: 24rpx;">
+      <view class="card card-elevated order-card" wx:for="{{orderList}}" wx:key="_id">
+        <view class="order-header" bindtap="viewDetail" data-id="{{item._id}}">
+          <view style="flex: 1; margin-right: 20rpx;">
+            <view class="title-md">{{item.name}}</view>
+            <view class="label-sm" style="color: var(--on-surface-variant); margin-top: 4rpx;">#{{item.orderCode || item._id}}</view>
+          </view>
+          <view class="chip" style="background: {{item.status === 'accepted' ? 'var(--primary-fixed)' : item.status === 'shipped' ? '#fff7e6' : item.status === 'completed' ? '#e6f7e6' : item.status === 'closed' ? '#fff1f0' : 'var(--surface-container)'}}; color: {{item.status === 'accepted' ? 'var(--on-primary-fixed)' : item.status === 'shipped' ? '#fa8c16' : item.status === 'completed' ? '#52c41a' : item.status === 'closed' ? '#cf1322' : 'var(--on-surface-variant)'}}; font-size: 22rpx;">
+            {{item.status === 'accepted' ? '进行中' : item.status === 'shipped' ? '已发货' : item.status === 'completed' ? '已完成' : item.status === 'closed' ? '已撤回' : '已取消'}}
+          </view>
+          <!-- 收款状态（新流程：已发货显示待收款） -->
+          <view class="chip" wx:if="{{item.status === 'shipped' || item.status === 'completed'}}" style="margin-left: 12rpx; background: {{item.status === 'shipped' ? '#fff7e6' : '#f6ffed'}}; color: {{item.status === 'shipped' ? '#fa8c16' : '#389e0d'}}; font-size: 22rpx;">
+            {{item.status === 'shipped' ? '待收款' : '已收款'}}
+          </view>
+        </view>
+        
+        <view bindtap="viewDetail" data-id="{{item._id}}" style="margin-bottom: 24rpx;">
+          <view style="display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; margin-bottom: 20rpx;">
+            <view>
+              <view class="label-sm" style="margin-bottom: 4rpx;">样式</view>
+              <view class="body-md">{{item.styleName}}</view>
+            </view>
+            <view>
+              <view class="label-sm" style="margin-bottom: 4rpx;">数量</view>
+              <view class="body-md">{{item.quantity}} 件</view>
+            </view>
+          </view>
+          <view style="padding: 20rpx; background: var(--surface-container); border-radius: 16rpx; margin-bottom: 16rpx;">
+            <view class="label-sm" style="margin-bottom: 4rpx;">总价</view>
+            <view class="headline-sm text-primary">¥{{item.totalPrice}}</view>
+          </view>
+          <view class="flex items-center gap-4">
+            <view class="flex-1">
+              <view class="label-sm" style="margin-bottom: 4rpx;">收货日期</view>
+              <view class="body-sm">{{item.receiveDate}}</view>
+            </view>
+            <view class="flex-1">
+              <view class="label-sm" style="margin-bottom: 4rpx;">接单时间</view>
+              <view class="body-sm">{{item.acceptDate}}</view>
+            </view>
+          </view>
+        </view>
+        
+        <view style="display: flex; justify-content: flex-end; gap: 16rpx; padding-top: 20rpx; border-top: 2rpx solid var(--outline-variant); border-top-opacity: 0.15;">
+          <view class="btn btn-tertiary btn-sm" bindtap="viewDetail" data-id="{{item._id}}">查看详情</view>
+          <!-- 进行中：填写运单 -->
+          <view class="btn btn-primary btn-sm" bindtap="viewDetail" data-id="{{item._id}}" wx:if="{{item.status === 'accepted'}}">
+            填写运单
+          </view>
+          <!-- 已发货：完成订单（上传照片） -->
+          <view class="btn btn-primary btn-sm" bindtap="viewDetail" data-id="{{item._id}}" wx:if="{{item.status === 'shipped' && (!item.completePhotos || item.completePhotos.length === 0)}}">
+            完成订单
+          </view>
+          <!-- 已发货（已传照片）：确认收款 -->
+          <view class="btn btn-success btn-sm" bindtap="confirmReceipt" data-id="{{item._id}}" wx:if="{{item.status === 'shipped' && item.completePhotos && item.completePhotos.length > 0}}" style="background: #52c41a; color: white;">
+            确认收款
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Empty State -->
+    <view class="empty-state" wx:if="{{!loading && orderList.length === 0}}">
+      <view style="width: 160rpx; height: 160rpx; background: var(--surface-container); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 32rpx;">
+        <text style="font-size: 80rpx; opacity: 0.6;">📭</text>
+      </view>
+      <view class="empty-text">暂无订单</view>
+      <view class="empty-desc">快去接单大厅看看吧</view>
+      <view class="btn btn-primary mt-4" bindtap="goToOrderHall">去接单大厅</view>
+    </view>
+
+    <!-- Load More -->
+    <view wx:if="{{hasMore}}" style="text-align: center; padding: 40rpx; color: var(--on-surface-variant); font-size: 26rpx;">
+      {{loading ? '加载中...' : '上拉加载更多'}}
+    </view>
+  </block>
+  
+  <!-- Bottom Spacer -->
+  <view style="height: 40rpx;"></view>
+</view>

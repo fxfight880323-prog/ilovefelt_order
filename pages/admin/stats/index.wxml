@@ -1,0 +1,308 @@
+<view class="container stats-container">
+  <!-- 加载状态 -->
+  <view class="loading-mask" wx:if="{{loading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text>数据加载中...</text>
+    </view>
+  </view>
+
+  <!-- 顶部时间筛选 -->
+  <view class="card filter-card">
+    <view class="filter-tabs">
+      <view class="filter-tab {{dateRange === 'week' ? 'active' : ''}}" 
+            data-range="week" bindtap="onDateRangeChange">近7天</view>
+      <view class="filter-tab {{dateRange === 'month' ? 'active' : ''}}" 
+            data-range="month" bindtap="onDateRangeChange">近30天</view>
+      <view class="filter-tab {{dateRange === 'quarter' ? 'active' : ''}}" 
+            data-range="quarter" bindtap="onDateRangeChange">本季度</view>
+      <view class="filter-tab {{dateRange === 'year' ? 'active' : ''}}" 
+            data-range="year" bindtap="onDateRangeChange">本年度</view>
+      <view class="filter-tab {{dateRange === 'all' ? 'active' : ''}}" 
+            data-range="all" bindtap="onDateRangeChange">全部</view>
+    </view>
+    <view class="date-picker-row" wx:if="{{dateRange === 'custom'}}">
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="date-picker">{{startDate}}</view>
+      </picker>
+      <text class="date-separator">至</text>
+      <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+        <view class="date-picker">{{endDate}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 管理员视角：全局统计 -->
+  <block wx:if="{{isAdmin}}">
+    <!-- 订单概览 -->
+    <view class="card stats-overview">
+      <view class="card-title flex-between">
+        <text>订单概览</text>
+        <view class="action-btns">
+          <text class="action-btn" bindtap="onRefresh">🔄 刷新</text>
+        </view>
+      </view>
+      <view class="stats-grid grid-5">
+        <view class="stat-item">
+          <view class="stat-value">{{orderStats.total}}</view>
+          <view class="stat-label">总订单</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-warning">{{orderStats.pending}}</view>
+          <view class="stat-label">待接单</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-primary">{{orderStats.accepted}}</view>
+          <view class="stat-label">进行中</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-info">{{orderStats.shipped}}</view>
+          <view class="stat-label">已发货</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-success">{{orderStats.completed}}</view>
+          <view class="stat-label">已完成</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 营收统计 -->
+    <view class="card revenue-card">
+      <view class="card-title">营收统计</view>
+      <view class="revenue-grid">
+        <view class="revenue-item main">
+          <view class="revenue-value">¥{{revenue.totalStr}}</view>
+          <view class="revenue-label">总营收</view>
+        </view>
+        <view class="revenue-item">
+          <view class="revenue-value">¥{{revenue.avgOrderValueStr}}</view>
+          <view class="revenue-label">客单价</view>
+        </view>
+        <view class="revenue-item">
+          <view class="revenue-value {{revenue.monthGrowth >= 0 ? 'text-success' : 'text-danger'}}">
+            {{revenue.monthGrowth >= 0 ? '+' : ''}}{{revenue.monthGrowth}}%
+          </view>
+          <view class="revenue-label">环比增长</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 状态分布图 -->
+    <view class="card chart-card">
+      <view class="card-title">订单状态分布</view>
+      <view class="chart-container">
+        <view class="pie-chart-placeholder">
+          <view class="pie-legend">
+            <view class="legend-item" wx:for="{{statusDistribution}}" wx:key="name">
+              <view class="legend-color" style="background: {{item.color}}"></view>
+              <text class="legend-name">{{item.name}}</text>
+              <text class="legend-value">{{item.value}}单</text>
+              <text class="legend-percent">({{item.value / orderStats.total * 100}}%)</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 月度趋势图 -->
+    <view class="card chart-card">
+      <view class="card-title">月度趋势</view>
+      <view class="chart-container">
+        <view class="trend-chart">
+          <view class="trend-item" wx:for="{{monthlyTrend}}" wx:key="month">
+            <view class="trend-month">{{item.month}}</view>
+            <view class="trend-bars">
+              <view class="trend-bar order-bar" style="width: {{item.orderPercent}}%">
+                <text class="bar-value">{{item.orderCount}}单</text>
+              </view>
+              <view class="trend-bar amount-bar" style="width: {{item.amountPercent}}%">
+                <text class="bar-value">¥{{item.amount}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 手艺人排行榜 -->
+    <view class="card ranking-card">
+      <view class="card-title">🏆 手艺人排行榜</view>
+      <view class="ranking-subtitle">排序：完成金额 ↓ | 评价 ↓</view>
+      <view class="ranking-list">
+        <view class="ranking-item {{index < 3 ? 'top-' + (index + 1) : ''}}" 
+              wx:for="{{craftsmanRanking}}" wx:key="_id" 
+              data-id="{{item._id}}" bindtap="goToCraftsmanDetail">
+          <view class="rank-number">{{index + 1}}</view>
+          <image class="rank-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+          <view class="rank-info">
+            <view class="rank-name">{{item.name}}</view>
+            <view class="rank-rating" wx:if="{{item.rating}}">
+              <text class="star">★</text>
+              <text class="rating-score">{{item.rating}}</text>
+            </view>
+          </view>
+          <view class="rank-stats">
+            <view class="rank-amount primary">¥{{item.totalAmount || 0}}</view>
+            <view class="rank-count">{{item.completedOrders}}单</view>
+          </view>
+        </view>
+        <view class="empty-state" wx:if="{{craftsmanRanking.length === 0}}">
+          <text>暂无数据</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 手艺人视角：个人业绩 -->
+  <block wx:if="{{!isAdmin && currentRole === 'craftsman'}}">
+    <!-- 个人业绩概览 -->
+    <view class="card personal-stats">
+      <view class="card-title">
+        <text>我的业绩</text>
+        <text class="rank-badge" wx:if="{{personalStats.rank > 0}}">排名 第{{personalStats.rank}}名</text>
+      </view>
+      <view class="stats-grid grid-4">
+        <view class="stat-item">
+          <view class="stat-value">{{personalStats.totalOrders}}</view>
+          <view class="stat-label">总订单</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-success">{{personalStats.completedOrders}}</view>
+          <view class="stat-label">已完成</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-primary">{{personalStats.inProgressOrders}}</view>
+          <view class="stat-label">进行中</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-warning">
+            <text class="star">★</text>{{personalStats.rating || 0}}
+          </view>
+          <view class="stat-label">评分</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 收入统计 -->
+    <view class="card revenue-card">
+      <view class="card-title">收入统计</view>
+      <view class="revenue-grid">
+        <view class="revenue-item main">
+          <view class="revenue-value">¥{{personalStats.totalAmountStr}}</view>
+          <view class="revenue-label">总收入</view>
+        </view>
+        <view class="revenue-item">
+          <view class="revenue-value text-success">¥{{personalStats.completedAmountStr}}</view>
+          <view class="revenue-label">已结算</view>
+        </view>
+        <view class="revenue-item">
+          <view class="revenue-value text-primary">
+            ¥{{personalStats.pendingAmount}}
+          </view>
+          <view class="revenue-label">待结算</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 月度业绩趋势 -->
+    <view class="card chart-card">
+      <view class="card-title">月度业绩趋势</view>
+      <view class="chart-container">
+        <view class="trend-chart personal">
+          <view class="trend-item" wx:for="{{monthlyTrend}}" wx:key="month">
+            <view class="trend-month">{{item.month}}</view>
+            <view class="trend-bars">
+              <view class="trend-bar completed-bar" style="width: {{item.percent}}%">
+                <text class="bar-value">{{item.completedCount}}单</text>
+              </view>
+            </view>
+            <view class="trend-amount">¥{{item.amount || 0}}</view>
+          </view>
+        </view>
+        <view class="empty-state" wx:if="{{monthlyTrend.length === 0}}">
+          <text>暂无数据</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 派单人视角 -->
+  <block wx:if="{{!isAdmin && currentRole === 'dispatcher'}}">
+    <!-- 派单统计 -->
+    <view class="card stats-overview">
+      <view class="card-title">我的派单统计</view>
+      <view class="stats-grid grid-5">
+        <view class="stat-item">
+          <view class="stat-value">{{orderStats.total}}</view>
+          <view class="stat-label">总订单</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-warning">{{orderStats.pending}}</view>
+          <view class="stat-label">待接单</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-primary">{{orderStats.accepted}}</view>
+          <view class="stat-label">进行中</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-info">{{orderStats.shipped}}</view>
+          <view class="stat-label">已发货</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value text-success">{{orderStats.completed}}</view>
+          <view class="stat-label">已完成</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 金额统计 -->
+    <view class="card revenue-card">
+      <view class="card-title">金额统计</view>
+      <view class="revenue-grid">
+        <view class="revenue-item main">
+          <view class="revenue-value">¥{{revenue.totalStr}}</view>
+          <view class="revenue-label">总金额</view>
+        </view>
+        <view class="revenue-item">
+          <view class="revenue-value">¥{{revenue.avgOrderValueStr}}</view>
+          <view class="revenue-label">平均订单</view>
+        </view>
+        <view class="revenue-item">
+          <view class="revenue-value text-success">{{orderStats.completed}}单</view>
+          <view class="revenue-label">已完成</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 样式统计 -->
+    <view class="card style-stats-card">
+      <view class="card-title">样式分布</view>
+      <view class="style-list">
+        <view class="style-item" wx:for="{{styleStats}}" wx:key="styleId">
+          <view class="style-name">{{item.styleName}}</view>
+          <view class="style-progress">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{item.percent}}%"></view>
+            </view>
+            <text class="progress-value">{{item.count}}单</text>
+          </view>
+        </view>
+        <view class="empty-state" wx:if="{{styleStats.length === 0}}">
+          <text>暂无数据</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 底部导航栏 -->
+  <view class="bottom-nav" wx:if="{{isAdmin}}">
+    <view class="nav-item" bindtap="onExport">
+      <text class="nav-icon">📤</text>
+      <text class="nav-text">导出报表</text>
+    </view>
+    <view class="nav-item" bindtap="onRefresh">
+      <text class="nav-icon">🔄</text>
+      <text class="nav-text">刷新数据</text>
+    </view>
+  </view>
+</view>

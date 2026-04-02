@@ -1,0 +1,270 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fcf9f4 0%, #f5f0e6 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 40rpx;
+  position: relative;
+}
+
+/* Logo 区域 */
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 100rpx;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.logo {
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  box-shadow: 0 8rpx 32rpx rgba(108, 88, 66, 0.15);
+  margin-bottom: 40rpx;
+}
+
+.brand-name {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #6c5842;
+  margin-bottom: 16rpx;
+  letter-spacing: 4rpx;
+}
+
+.slogan {
+  font-size: 28rpx;
+  color: #999;
+  letter-spacing: 2rpx;
+}
+
+/* 加载动画 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40rpx;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #e8e0d5;
+  border-top: 4rpx solid #6c5842;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.retry-btn {
+  margin-top: 40rpx;
+  padding: 20rpx 40rpx;
+  background: rgba(108, 88, 66, 0.1);
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  color: #6c5842;
+}
+
+.retry-btn:active {
+  opacity: 0.7;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 登录区域 */
+.login-container {
+  width: 100%;
+  max-width: 600rpx;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-tips {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.tips-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 登录按钮 */
+.login-btn {
+  width: 100%;
+  height: 100rpx;
+  border-radius: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+  border: none;
+  font-size: 32rpx;
+  transition: all 0.3s;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.btn-icon {
+  font-size: 36rpx;
+  margin-right: 16rpx;
+}
+
+.btn-text {
+  font-weight: 500;
+}
+
+.wechat-btn {
+  background: linear-gradient(135deg, #07c160 0%, #05a050 100%);
+  color: #fff;
+  box-shadow: 0 8rpx 20rpx rgba(7, 193, 96, 0.3);
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: #fff;
+  box-shadow: 0 8rpx 20rpx rgba(255, 152, 0, 0.3);
+}
+
+/* 手机号登录表单 */
+.phone-login-form {
+  width: 100%;
+}
+
+.phone-login-form .form-item {
+  margin-bottom: 30rpx;
+}
+
+.phone-login-form .input {
+  width: 100%;
+  height: 100rpx;
+  background: #fff;
+  border-radius: 50rpx;
+  padding: 0 40rpx;
+  font-size: 30rpx;
+  color: #333;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.phone-login-form .input::placeholder {
+  color: #999;
+}
+
+.switch-mode {
+  text-align: center;
+  margin-top: 40rpx;
+  padding: 20rpx;
+}
+
+.switch-text {
+  font-size: 28rpx;
+  color: #6c5842;
+  text-decoration: underline;
+}
+
+.switch-mode:active {
+  opacity: 0.7;
+}
+
+/* 协议区域 */
+.protocol-container {
+  position: fixed;
+  bottom: 100rpx;
+  left: 40rpx;
+  right: 40rpx;
+}
+
+.protocol-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.protocol-checkbox {
+  transform: scale(0.7);
+  margin-right: 8rpx;
+  margin-top: 4rpx;
+}
+
+.protocol-text-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.protocol-text {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.6;
+}
+
+.protocol-link {
+  font-size: 22rpx;
+  color: #6c5842;
+  text-decoration: underline;
+  line-height: 1.6;
+}
+
+/* 版本号 */
+.version {
+  position: fixed;
+  bottom: 40rpx;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 22rpx;
+  color: #ccc;
+}
+
+/* 加载遮罩 */
+.loading-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(252, 249, 244, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.loading-mask .logo {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 40rpx;
+}
+
+.loading-mask .brand-name {
+  font-size: 40rpx;
+}

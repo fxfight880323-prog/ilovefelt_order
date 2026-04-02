@@ -1,0 +1,10 @@
+{
+  "name": "mysql_proxy",
+  "version": "1.0.0",
+  "description": "CloudBase MySQL proxy service",
+  "main": "index.js",
+  "dependencies": {
+    "mysql2": "^3.6.5",
+    "wx-server-sdk": "latest"
+  }
+}
