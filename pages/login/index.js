@@ -41,6 +41,14 @@ Page({
 
   onShow() {
     console.log('登录页 onShow')
+    // 检查退出标记
+    const logoutFlag = wx.getStorageSync('logoutFlag')
+    if (logoutFlag) {
+      console.log('检测到退出标记，保持登录页面')
+      this.showLoginButtons()
+      // 清除退出标记，允许下次正常自动登录
+      wx.removeStorageSync('logoutFlag')
+    }
   },
 
   // 检查登录状态并跳转 - 使用新API

@@ -30,7 +30,29 @@
         </view>
         <view class="stat-card">
           <view class="stat-number">{{stats.orderCount}}</view>
-          <view class="stat-label">订单</view>
+          <view class="stat-label">总订单</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单状态统计 -->
+    <view class="order-stats-section">
+      <view class="order-stat-row">
+        <view class="order-stat-item">
+          <view class="order-stat-number pending">{{stats.pendingOrders}}</view>
+          <view class="order-stat-label">待接单</view>
+        </view>
+        <view class="order-stat-item">
+          <view class="order-stat-number accepted">{{stats.acceptedOrders}}</view>
+          <view class="order-stat-label">进行中</view>
+        </view>
+        <view class="order-stat-item">
+          <view class="order-stat-number completed">{{stats.completedOrders}}</view>
+          <view class="order-stat-label">已完成</view>
+        </view>
+        <view class="order-stat-item">
+          <view class="order-stat-number cancelled">{{stats.cancelledOrders}}</view>
+          <view class="order-stat-label">已取消</view>
         </view>
       </view>
     </view>
@@ -41,11 +63,13 @@
         待审批
         <text wx:if="{{stats.pendingCount > 0}}" class="badge">{{stats.pendingCount}}</text>
       </view>
+      <view class="tab-item {{currentTab === 'orders' ? 'active' : ''}}" bindtap="switchTab" data-tab="orders">订单</view>
+      <view class="tab-item {{currentTab === 'users' ? 'active' : ''}}" bindtap="switchTab" data-tab="users">用户</view>
       <view class="tab-item {{currentTab === 'stats' ? 'active' : ''}}" bindtap="switchTab" data-tab="stats">统计</view>
     </view>
 
     <!-- 待审批列表 -->
-    <view wx:if="{{currentTab === 'pending'}}" class="pending-section">
+    <view wx:if="{{currentTab === 'pending'}}" class="content-section">
       <view class="section-header">
         <text class="section-title">待审批申请</text>
         <text class="refresh-btn" bindtap="refresh">刷新</text>
@@ -57,13 +81,13 @@
       </view>
 
       <view wx:else class="pending-list">
-        <view wx:for="{{pendingList}}" wx:key="index" class="pending-item">
+        <view wx:for="{{pendingList}}" wx:key="userId" class="pending-item">
           <view class="user-info">
             <view class="user-name">{{item.name}}</view>
             <view class="user-phone">{{item.phone}}</view>
             <view class="apply-info">
-              <text class="role-tag {{item.role}}">{{item.role === 'craftsman' ? '手艺人' : '派单人'}}</text>
-              <text class="apply-time">{{item.applyTime}}</text>
+              <text class="role-tag {{item.role}}">{{item.roleText}}</text>
+              <text class="apply-time">{{item.applyTimeText}}</text>
             </view>
           </view>
           <view class="action-btns">
@@ -82,27 +106,124 @@
       </view>
     </view>
 
+    <!-- 订单列表 -->
+    <view wx:if="{{currentTab === 'orders'}}" class="content-section">
+      <view class="section-header">
+        <text class="section-title">订单管理</text>
+        <text class="refresh-btn" bindtap="refresh">刷新</text>
+      </view>
+
+      <view wx:if="{{orderList.length === 0}}" class="empty-state">
+        <text class="empty-icon">📦</text>
+        <text class="empty-text">暂无订单</text>
+      </view>
+
+      <view wx:else class="order-list">
+        <view wx:for="{{orderList}}" wx:key="_id" class="order-item" bindtap="viewOrderDetail" data-order-id="{{item._id}}">
+          <view class="order-header">
+            <text class="order-no">{{item.orderNo}}</text>
+            <text class="order-status {{item.status}}">{{item.statusText}}</text>
+          </view>
+          <view class="order-body">
+            <view class="order-name">{{item.name}}</view>
+            <view class="order-info">
+              <text>数量: {{item.quantity}}</text>
+              <text>单价: ¥{{item.price}}</text>
+              <text class="order-amount">总价: ¥{{item.totalAmount}}</text>
+            </view>
+            <view class="order-users">
+              <text>派单人: {{item.dispatcherName || '-'}}</text>
+              <text>手艺人: {{item.craftsmanName || '未分配'}}</text>
+            </view>
+            <view class="order-time">创建时间: {{item.createTimeText}}</view>
+          </view>
+          <view class="order-footer" wx:if="{{item.status === 'pending' || item.status === 'accepted'}}">
+            <button class="btn-cancel" size="mini" 
+              data-order-id="{{item._id}}" 
+              data-order-no="{{item.orderNo}}"
+              bindtap="cancelOrder">取消订单</button>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用户列表 -->
+    <view wx:if="{{currentTab === 'users'}}" class="content-section">
+      <view class="section-header">
+        <text class="section-title">用户管理</text>
+        <text class="refresh-btn" bindtap="refresh">刷新</text>
+      </view>
+
+      <view wx:if="{{userList.length === 0}}" class="empty-state">
+        <text class="empty-icon">👥</text>
+        <text class="empty-text">暂无用户</text>
+      </view>
+
+      <view wx:else class="user-list">
+        <view wx:for="{{userList}}" wx:key="_id" class="user-item">
+          <view class="user-main">
+            <view class="user-header">
+              <text class="user-name">{{item.name}}</text>
+              <text class="user-status {{item.status}}">{{item.status}}</text>
+            </view>
+            <view class="user-phone">{{item.phone}}</view>
+            <view class="user-roles">
+              <text>角色: {{item.rolesText || '无'}}</text>
+            </view>
+            <view class="user-time">注册时间: {{item.createTimeText}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 统计页面 -->
-    <view wx:if="{{currentTab === 'stats'}}" class="stats-detail">
-      <view class="stat-row">
-        <text class="stat-label">注册用户</text>
-        <text class="stat-value">{{stats.userCount}} 人</text>
-      </view>
-      <view class="stat-row">
-        <text class="stat-label">手艺人</text>
-        <text class="stat-value">{{stats.craftsmanCount}} 人</text>
-      </view>
-      <view class="stat-row">
-        <text class="stat-label">派单人</text>
-        <text class="stat-value">{{stats.dispatcherCount}} 人</text>
-      </view>
-      <view class="stat-row">
-        <text class="stat-label">订单总数</text>
-        <text class="stat-value">{{stats.orderCount}} 单</text>
-      </view>
-      <view class="stat-row">
-        <text class="stat-label">待审批</text>
-        <text class="stat-value highlight">{{stats.pendingCount}} 人</text>
+    <view wx:if="{{currentTab === 'stats'}}" class="content-section">
+      <view class="section-title">详细统计</view>
+      
+      <view class="stats-detail">
+        <view class="stat-category">
+          <view class="category-title">用户统计</view>
+          <view class="stat-row">
+            <text class="stat-label">注册用户总数</text>
+            <text class="stat-value">{{stats.userCount}} 人</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">手艺人</text>
+            <text class="stat-value">{{stats.craftsmanCount}} 人</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">派单人</text>
+            <text class="stat-value">{{stats.dispatcherCount}} 人</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">待审批</text>
+            <text class="stat-value highlight">{{stats.pendingCount}} 人</text>
+          </view>
+        </view>
+
+        <view class="stat-category">
+          <view class="category-title">订单统计</view>
+          <view class="stat-row">
+            <text class="stat-label">订单总数</text>
+            <text class="stat-value">{{stats.orderCount}} 单</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">待接单</text>
+            <text class="stat-value pending">{{stats.pendingOrders}} 单</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">进行中</text>
+            <text class="stat-value accepted">{{stats.acceptedOrders}} 单</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">已完成</text>
+            <text class="stat-value completed">{{stats.completedOrders}} 单</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">已取消</text>
+            <text class="stat-value cancelled">{{stats.cancelledOrders}} 单</text>
+          </view>
+        </view>
       </view>
     </view>
 
