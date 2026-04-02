@@ -159,15 +159,19 @@ Page({
         .limit(50)
         .get()
       
-      const formattedUsers = users.map(user => ({
-        ...user,
-        rolesText: (user.roles || []).map(r => {
-          const map = { admin: '管理员', craftsman: '手艺人', dispatcher: '派单人' }
-          return map[r] || r
-        }).join(', '),
-        createTimeText: this.formatTime(user.createTime),
-        status: this.getUserStatus(user)
-      }))
+      const formattedUsers = users.map(user => {
+        const statusInfo = this.getUserStatus(user)
+        return {
+          ...user,
+          rolesText: (user.roles || []).map(r => {
+            const map = { admin: '管理员', craftsman: '手艺人', dispatcher: '派单人' }
+            return map[r] || r
+          }).join(', '),
+          createTimeText: this.formatTime(user.createTime),
+          status: statusInfo.text,
+          statusClass: statusInfo.class
+        }
+      })
       
       this.setData({ userList: formattedUsers })
     } catch (err) {
@@ -177,12 +181,12 @@ Page({
 
   // 获取用户状态
   getUserStatus(user) {
-    if (user.isSuperAdmin) return '超级管理员'
+    if (user.isSuperAdmin) return { text: '超级管理员', class: 'admin' }
     const pending = user.roleApplications?.filter(app => app.status === 'pending').length || 0
-    if (pending > 0) return '待审批'
+    if (pending > 0) return { text: '待审批', class: 'pending' }
     const active = user.roleApplications?.filter(app => app.status === 'active').length || 0
-    if (active > 0) return '正常'
-    return '未激活'
+    if (active > 0) return { text: '正常', class: 'active' }
+    return { text: '未激活', class: 'inactive' }
   },
 
   // 获取状态文本

@@ -164,7 +164,7 @@
           <view class="user-main">
             <view class="user-header">
               <text class="user-name">{{item.name}}</text>
-              <text class="user-status {{item.status}}">{{item.status}}</text>
+              <text class="user-status {{item.statusClass}}">{{item.status}}</text>
             </view>
             <view class="user-phone">{{item.phone}}</view>
             <view class="user-roles">

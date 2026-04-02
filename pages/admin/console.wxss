@@ -408,22 +408,22 @@
   border-radius: 8rpx;
 }
 
-.user-status.超级管理员 {
+.user-status.admin {
   background: #fff3e0;
   color: #ff9500;
 }
 
-.user-status.正常 {
+.user-status.active {
   background: #e6f7ed;
   color: #07c160;
 }
 
-.user-status.待审批 {
+.user-status.pending {
   background: #fff5f0;
   color: #ff6b6b;
 }
 
-.user-status.未激活 {
+.user-status.inactive {
   background: #f5f5f5;
   color: #999;
 }
