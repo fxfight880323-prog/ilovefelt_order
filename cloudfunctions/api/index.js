@@ -379,6 +379,177 @@ async function handleAdmin(action, data, openid) {
       })
     }
     
+    case 'getCraftsmenList': {
+      const { page = 1, pageSize = 20, status } = data
+      const skip = (page - 1) * pageSize
+      
+      let where = {}
+      if (status) where.status = status
+      
+      const { data: list } = await db.collection('craftsmen')
+        .where(where)
+        .orderBy('createTime', 'desc')
+        .skip(skip)
+        .limit(pageSize)
+        .get()
+      
+      const { total } = await db.collection('craftsmen').where(where).count()
+      
+      return success({ list, total, page, pageSize })
+    }
+    
+    case 'getDispatchersList': {
+      const { page = 1, pageSize = 20, status } = data
+      const skip = (page - 1) * pageSize
+      
+      let where = {}
+      if (status) where.status = status
+      
+      const { data: list } = await db.collection('dispatchers')
+        .where(where)
+        .orderBy('createTime', 'desc')
+        .skip(skip)
+        .limit(pageSize)
+        .get()
+      
+      const { total } = await db.collection('dispatchers').where(where).count()
+      
+      return success({ list, total, page, pageSize })
+    }
+    
+    case 'getOrdersList': {
+      const { page = 1, pageSize = 20, status, orderNo } = data
+      const skip = (page - 1) * pageSize
+      
+      let where = {}
+      if (status) where.status = status
+      if (orderNo) where.orderNo = db.RegExp({ regexp: orderNo, options: 'i' })
+      
+      const { data: list } = await db.collection('orders')
+        .where(where)
+        .orderBy('createTime', 'desc')
+        .skip(skip)
+        .limit(pageSize)
+        .get()
+      
+      const { total } = await db.collection('orders').where(where).count()
+      
+      return success({ list, total, page, pageSize })
+    }
+    
+    case 'updateCraftsman': {
+      const { id, name, phone, status, remark } = data
+      
+      if (!id) return error('缺少ID参数')
+      
+      const updateData = { updateTime: new Date() }
+      if (name !== undefined) updateData.name = name
+      if (phone !== undefined) updateData.phone = phone
+      if (status !== undefined) updateData.status = status
+      if (remark !== undefined) updateData.remark = remark
+      
+      await db.collection('craftsmen').doc(id).update({ data: updateData })
+      
+      // 同步更新users集合
+      if (phone && (name !== undefined || status !== undefined)) {
+        const { data: users } = await db.collection('users').where({ phone }).get()
+        if (users.length > 0) {
+          const userUpdate = { updateTime: new Date() }
+          if (name !== undefined) userUpdate.name = name
+          if (status !== undefined) {
+            const roleApps = users[0].roleApplications || []
+            const appIndex = roleApps.findIndex(app => app.role === 'craftsman')
+            if (appIndex >= 0) {
+              roleApps[appIndex].status = status
+              userUpdate.roleApplications = roleApps
+            }
+          }
+          await db.collection('users').doc(users[0]._id).update({ data: userUpdate })
+        }
+      }
+      
+      return success(null, '更新成功')
+    }
+    
+    case 'updateDispatcher': {
+      const { id, name, phone, status, remark } = data
+      
+      if (!id) return error('缺少ID参数')
+      
+      const updateData = { updateTime: new Date() }
+      if (name !== undefined) updateData.name = name
+      if (phone !== undefined) updateData.phone = phone
+      if (status !== undefined) updateData.status = status
+      if (remark !== undefined) updateData.remark = remark
+      
+      await db.collection('dispatchers').doc(id).update({ data: updateData })
+      
+      // 同步更新users集合
+      if (phone && (name !== undefined || status !== undefined)) {
+        const { data: users } = await db.collection('users').where({ phone }).get()
+        if (users.length > 0) {
+          const userUpdate = { updateTime: new Date() }
+          if (name !== undefined) userUpdate.name = name
+          if (status !== undefined) {
+            const roleApps = users[0].roleApplications || []
+            const appIndex = roleApps.findIndex(app => app.role === 'dispatcher')
+            if (appIndex >= 0) {
+              roleApps[appIndex].status = status
+              userUpdate.roleApplications = roleApps
+            }
+          }
+          await db.collection('users').doc(users[0]._id).update({ data: userUpdate })
+        }
+      }
+      
+      return success(null, '更新成功')
+    }
+    
+    case 'updateOrder': {
+      const { id, name, quantity, price, status, remark, receiveDate } = data
+      
+      if (!id) return error('缺少ID参数')
+      
+      const updateData = { updateTime: new Date() }
+      
+      if (name !== undefined) updateData.name = name
+      if (quantity !== undefined) {
+        updateData.quantity = parseInt(quantity)
+        // 重新计算总价
+        const { data: orders } = await db.collection('orders').doc(id).get()
+        if (orders.length > 0) {
+          const price = orders[0].price
+          updateData.totalAmount = parseInt(quantity) * price
+        }
+      }
+      if (price !== undefined) {
+        updateData.price = parseFloat(price)
+        // 重新计算总价
+        const { data: orders } = await db.collection('orders').doc(id).get()
+        if (orders.length > 0) {
+          const quantity = orders[0].quantity
+          updateData.totalAmount = quantity * parseFloat(price)
+        }
+      }
+      if (status !== undefined) updateData.status = status
+      if (remark !== undefined) updateData.remark = remark
+      if (receiveDate !== undefined) updateData.receiveDate = receiveDate
+      
+      await db.collection('orders').doc(id).update({ data: updateData })
+      
+      return success(null, '更新成功')
+    }
+    
+    case 'deleteOrder': {
+      const { id } = data
+      
+      if (!id) return error('缺少ID参数')
+      
+      await db.collection('orders').doc(id).remove()
+      
+      return success(null, '删除成功')
+    }
+    
     default:
       return error('未知操作')
   }

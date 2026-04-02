@@ -337,6 +337,21 @@ Page({
     })
   },
 
+  // 跳转到手艺人列表
+  goToCraftsmanList() {
+    wx.navigateTo({ url: '/pages/admin/craftsmanList' })
+  },
+
+  // 跳转到派单人列表
+  goToDispatcherList() {
+    wx.navigateTo({ url: '/pages/admin/dispatcherList' })
+  },
+
+  // 跳转到订单列表
+  goToOrderList() {
+    wx.navigateTo({ url: '/pages/admin/orderList' })
+  },
+
   // 刷新数据
   refresh() {
     this.loadData()

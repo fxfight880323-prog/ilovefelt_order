@@ -1,0 +1,112 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">← 返回</view>
+    <view class="title">派单人管理</view>
+    <view class="refresh-btn" bindtap="onRefresh">刷新</view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-item">
+      <view class="stats-number">{{total}}</view>
+      <view class="stats-label">总人数</view>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-tabs">
+      <view class="filter-tab {{statusFilter === '' ? 'active' : ''}}" 
+            bindtap="onStatusChange" data-status="">全部</view>
+      <view class="filter-tab {{statusFilter === 'active' ? 'active' : ''}}" 
+            bindtap="onStatusChange" data-status="active">正常</view>
+      <view class="filter-tab {{statusFilter === 'pending' ? 'active' : ''}}" 
+            bindtap="onStatusChange" data-status="pending">待审批</view>
+      <view class="filter-tab {{statusFilter === 'disabled' ? 'active' : ''}}" 
+            bindtap="onStatusChange" data-status="disabled">已禁用</view>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input" 
+           placeholder="搜索姓名或手机号" 
+           value="{{keyword}}"
+           bindinput="onSearchInput"
+           confirm-type="search"
+           bindconfirm="onSearch"/>
+    <view class="search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list-container">
+    <view wx:if="{{list.length === 0 && !isLoading}}" class="empty-state">
+      <text class="empty-icon">📦</text>
+      <text class="empty-text">暂无派单人</text>
+    </view>
+
+    <view class="dispatcher-list">
+      <view wx:for="{{list}}" wx:key="_id" class="dispatcher-item">
+        <view class="item-main">
+          <view class="item-header">
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-status {{item.status}}">{{item.statusText}}</text>
+          </view>
+          <view class="item-phone">📱 {{item.phone}}</view>
+          <view wx:if="{{item.remark}}" class="item-remark">备注: {{item.remark}}</view>
+          <view class="item-time">注册时间: {{item.createTimeText}}</view>
+        </view>
+        <view class="item-actions">
+          <button class="btn-edit" size="mini" bindtap="onEdit" data-id="{{item._id}}">编辑</button>
+          <button class="btn-delete" size="mini" bindtap="onDelete" data-id="{{item._id}}" data-name="{{item.name}}">删除</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore}}" class="load-more" bindtap="loadMore">
+      <text wx:if="{{!isLoading}}">点击加载更多</text>
+      <text wx:else>加载中...</text>
+    </view>
+    <view wx:else class="no-more">没有更多了</view>
+  </view>
+
+  <!-- 编辑弹窗 -->
+  <view wx:if="{{showEdit}}" class="modal-mask" bindtap="hideEditModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">编辑派单人</text>
+        <text class="modal-close" bindtap="hideEditModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">姓名</text>
+          <input class="form-input" value="{{editForm.name}}" 
+                 data-field="name" bindinput="onEditInput" placeholder="请输入姓名"/>
+        </view>
+        <view class="form-item">
+          <text class="form-label">手机号</text>
+          <input class="form-input" value="{{editForm.phone}}" 
+                 data-field="phone" bindinput="onEditInput" placeholder="请输入手机号" type="number"/>
+        </view>
+        <view class="form-item">
+          <text class="form-label">状态</text>
+          <picker bindchange="onEditStatusChange" value="{{editForm.status}}" range="{{['active', 'pending', 'rejected', 'disabled']}}">
+            <view class="picker-value">{{editForm.status}}</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="form-label">备注</text>
+          <textarea class="form-textarea" value="{{editForm.remark}}" 
+                    data-field="remark" bindinput="onEditInput" 
+                    placeholder="请输入备注" maxlength="200"/>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideEditModal">取消</button>
+        <button class="btn-confirm" type="primary" bindtap="onSaveEdit">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

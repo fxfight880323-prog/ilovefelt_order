@@ -20,17 +20,39 @@
           <view class="stat-number">{{stats.pendingCount}}</view>
           <view class="stat-label">待审批</view>
         </view>
-        <view class="stat-card">
+        <view class="stat-card" bindtap="goToCraftsmanList">
           <view class="stat-number">{{stats.craftsmanCount}}</view>
           <view class="stat-label">手艺人</view>
         </view>
-        <view class="stat-card">
+        <view class="stat-card" bindtap="goToDispatcherList">
           <view class="stat-number">{{stats.dispatcherCount}}</view>
           <view class="stat-label">派单人</view>
         </view>
-        <view class="stat-card">
+        <view class="stat-card" bindtap="goToOrderList">
           <view class="stat-number">{{stats.orderCount}}</view>
           <view class="stat-label">总订单</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快速导航 -->
+    <view class="quick-nav">
+      <view class="section-title">快速管理</view>
+      <view class="nav-grid">
+        <view class="nav-item" bindtap="goToCraftsmanList">
+          <view class="nav-icon craftsman">👨‍🎨</view>
+          <view class="nav-text">手艺人列表</view>
+          <view class="nav-desc">查看编辑手艺人</view>
+        </view>
+        <view class="nav-item" bindtap="goToDispatcherList">
+          <view class="nav-icon dispatcher">📦</view>
+          <view class="nav-text">派单人列表</view>
+          <view class="nav-desc">查看编辑派单人</view>
+        </view>
+        <view class="nav-item" bindtap="goToOrderList">
+          <view class="nav-icon orders">📋</view>
+          <view class="nav-text">总订单列表</view>
+          <view class="nav-desc">查看编辑订单</view>
         </view>
       </view>
     </view>

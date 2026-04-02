@@ -484,6 +484,45 @@
 .stat-value.completed { color: #07c160; }
 .stat-value.cancelled { color: #999; }
 
+/* 快速导航 */
+.quick-nav {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.nav-grid {
+  display: flex;
+  gap: 20rpx;
+}
+
+.nav-item {
+  flex: 1;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  padding: 30rpx 20rpx;
+  text-align: center;
+}
+
+.nav-icon {
+  font-size: 48rpx;
+  margin-bottom: 16rpx;
+}
+
+.nav-text {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.nav-desc {
+  font-size: 22rpx;
+  color: #999;
+}
+
 /* 退出按钮 */
 .logout-section {
   margin-top: 40rpx;
