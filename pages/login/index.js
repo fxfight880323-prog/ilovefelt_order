@@ -55,6 +55,14 @@ Page({
   async checkLoginAndNavigate() {
     console.log('开始检查登录状态')
     
+    // 检查退出标记
+    const logoutFlag = wx.getStorageSync('logoutFlag')
+    if (logoutFlag) {
+      console.log('检测到退出标记，取消自动登录')
+      this.showLoginButtons()
+      return
+    }
+    
     try {
       const cachedRole = wx.getStorageSync('userRole')
       if (cachedRole && cachedRole !== 'guest') {
