@@ -44,10 +44,12 @@ Page({
     // 检查退出标记
     const logoutFlag = wx.getStorageSync('logoutFlag')
     if (logoutFlag) {
-      console.log('检测到退出标记，保持登录页面')
-      this.showLoginButtons()
-      // 清除退出标记，允许下次正常自动登录
-      wx.removeStorageSync('logoutFlag')
+      console.log('检测到退出标记，保持登录页面，不自动刷新')
+      this.setData({
+        isLoading: false,
+        showLogin: true
+      })
+      // 不清除标记，等用户成功登录后再清除
     }
   },
 
@@ -105,6 +107,9 @@ Page({
         wx.setStorageSync('userInfo', roleInfo || {})
         
         console.log('自动登录成功:', role)
+        
+        // 清除退出标记，允许下次正常登录
+        wx.removeStorageSync('logoutFlag')
         
         this.setData({ loadingText: '正在进入...' })
         setTimeout(() => {
