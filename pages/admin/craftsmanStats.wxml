@@ -1,0 +1,144 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">← 返回</view>
+    <view class="title">手艺人统计</view>
+    <view class="refresh-btn" bindtap="onRefresh">刷新</view>
+  </view>
+
+  <!-- 统计概览 -->
+  <view class="overview-card">
+    <view class="overview-title">👨‍🎨 统计概览</view>
+    <view class="overview-item">
+      <text class="overview-label">手艺人总数</text>
+      <text class="overview-value">{{total}} 人</text>
+    </view>
+  </view>
+
+  <!-- 排序栏 -->
+  <view class="sort-bar">
+    <view class="sort-title">排序方式:</view>
+    <view class="sort-options">
+      <view class="sort-option {{sortBy === 'avgRating' ? 'active' : ''}}" 
+            bindtap="onSortChange" data-field="avgRating">
+        评分 {{sortBy === 'avgRating' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}}
+      </view>
+      <view class="sort-option {{sortBy === 'totalAmount' ? 'active' : ''}}" 
+            bindtap="onSortChange" data-field="totalAmount">
+        金额 {{sortBy === 'totalAmount' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}}
+      </view>
+      <view class="sort-option {{sortBy === 'completedOrders' ? 'active' : ''}}" 
+            bindtap="onSortChange" data-field="completedOrders">
+        完成数 {{sortBy === 'completedOrders' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list-container">
+    <view wx:if="{{list.length === 0 && !isLoading}}" class="empty-state">
+      <text class="empty-icon">👨‍🎨</text>
+      <text class="empty-text">暂无手艺人数据</text>
+    </view>
+
+    <view class="stats-list">
+      <view wx:for="{{list}}" wx:key="_id" class="stats-item">
+        <view class="item-header">
+          <view class="item-info">
+            <view class="item-name-row">
+              <text class="item-name">{{item.name}}</text>
+              <view wx:if="{{item.level}}" class="item-level">{{item.level}}</view>
+            </view>
+            <text class="item-phone">{{item.phone}}</text>
+          </view>
+          <view class="item-status {{item.status}}">{{item.status === 'active' ? '正常' : '禁用'}}</view>
+        </view>
+
+        <!-- 评分显示 -->
+        <view class="rating-section">
+          <view class="rating-display">
+            <text class="rating-score">{{item.stats.avgRating || item.rating || 0}}</text>
+            <view class="rating-stars">
+              <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" 
+                    class="star {{(item.stats.avgRating || item.rating || 0) >= item ? 'active' : ''}}">★</text>
+            </view>
+            <text class="rating-count">({{item.stats.ratingCount || 0}} 条评价)</text>
+          </view>
+          <button class="btn-edit-rating" size="mini" 
+                  bindtap="onEditRating" data-id="{{item._id}}">修改评分</button>
+        </view>
+
+        <view class="item-stats">
+          <view class="stat-row">
+            <view class="stat-box highlight">
+              <view class="stat-value money">¥{{item.stats.totalAmount}}</view>
+              <view class="stat-label">已完成金额</view>
+            </view>
+          </view>
+
+          <view class="stat-row">
+            <view class="stat-box">
+              <view class="stat-value">{{item.stats.totalOrders}}</view>
+              <view class="stat-label">总接单</view>
+            </view>
+            <view class="stat-box">
+              <view class="stat-value success">{{item.stats.completedOrders}}</view>
+              <view class="stat-label">已完成</view>
+            </view>
+            <view class="stat-box">
+              <view class="stat-value info">{{item.stats.ongoingOrders}}</view>
+              <view class="stat-label">进行中</view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{item.adminComment}}" class="admin-comment">
+          <text class="comment-label">管理员备注:</text>
+          <text class="comment-text">{{item.adminComment}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore}}" class="load-more" bindtap="loadMore">
+      <text wx:if="{{!isLoading}}">点击加载更多</text>
+      <text wx:else>加载中...</text>
+    </view>
+    <view wx:else class="no-more">没有更多了</view>
+  </view>
+
+  <!-- 编辑评分弹窗 -->
+  <view wx:if="{{showEdit}}" class="modal-mask" bindtap="hideEditModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">修改评分评级</text>
+        <text class="modal-close" bindtap="hideEditModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">评分 (0-5)</text>
+          <input class="form-input" type="digit" value="{{editForm.rating}}" 
+                 bindinput="onRatingInput" placeholder="请输入评分"/>
+          <view class="rating-preview">
+            <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" 
+                  class="star {{editForm.rating >= item ? 'active' : ''}}">★</text>
+          </view>
+        </view>
+        <view class="form-item">
+          <text class="form-label">等级/称号</text>
+          <input class="form-input" value="{{editForm.level}}" 
+                 bindinput="onLevelInput" placeholder="如：高级工匠、星级师傅"/>
+        </view>
+        <view class="form-item">
+          <text class="form-label">管理员备注</text>
+          <textarea class="form-textarea" value="{{editForm.comment}}" 
+                    bindinput="onCommentInput" placeholder="输入备注信息..."/>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideEditModal">取消</button>
+        <button class="btn-confirm" type="primary" bindtap="onSaveRating">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

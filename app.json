@@ -19,6 +19,8 @@
     "pages/admin/craftsmanList",
     "pages/admin/dispatcherList",
     "pages/admin/orderList",
+    "pages/admin/dispatcherStats",
+    "pages/admin/craftsmanStats",
     "pages/admin/orderManage",
     "pages/admin/styleManage",
     "pages/admin/orderForm",

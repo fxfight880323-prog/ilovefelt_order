@@ -550,6 +550,138 @@ async function handleAdmin(action, data, openid) {
       return success(null, '删除成功')
     }
     
+    case 'getDispatcherStats': {
+      // 获取所有派单人统计
+      const { page = 1, pageSize = 20 } = data
+      const skip = (page - 1) * pageSize
+      
+      const { data: dispatchers } = await db.collection('dispatchers')
+        .orderBy('createTime', 'desc')
+        .skip(skip)
+        .limit(pageSize)
+        .get()
+      
+      const { total } = await db.collection('dispatchers').count()
+      
+      // 统计每个派单人的订单情况
+      const statsList = await Promise.all(dispatchers.map(async (d) => {
+        const phone = d.phone
+        
+        // 该派单人的所有订单
+        const { data: orders } = await db.collection('orders')
+          .where({ dispatcherPhone: phone })
+          .get()
+        
+        const totalOrders = orders.length
+        const pendingOrders = orders.filter(o => o.status === 'pending').length
+        const acceptedOrders = orders.filter(o => o.status === 'accepted').length
+        const completedOrders = orders.filter(o => o.status === 'completed').length
+        const cancelledOrders = orders.filter(o => o.status === 'cancelled').length
+        
+        // 计算总金额（已完成的订单）
+        const totalAmount = orders
+          .filter(o => o.status === 'completed')
+          .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+        
+        // 计算预估金额（所有非取消订单）
+        const estimatedAmount = orders
+          .filter(o => o.status !== 'cancelled')
+          .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+        
+        return {
+          ...d,
+          stats: {
+            totalOrders,
+            pendingOrders,
+            acceptedOrders,
+            completedOrders,
+            cancelledOrders,
+            totalAmount: totalAmount.toFixed(2),
+            estimatedAmount: estimatedAmount.toFixed(2)
+          }
+        }
+      }))
+      
+      return success({ list: statsList, total, page, pageSize })
+    }
+    
+    case 'getCraftsmanStats': {
+      // 获取所有手艺人统计
+      const { page = 1, pageSize = 20 } = data
+      const skip = (page - 1) * pageSize
+      
+      const { data: craftsmen } = await db.collection('craftsmen')
+        .orderBy('createTime', 'desc')
+        .skip(skip)
+        .limit(pageSize)
+        .get()
+      
+      const { total } = await db.collection('craftsmen').count()
+      
+      // 统计每个手艺人的订单情况
+      const statsList = await Promise.all(craftsmen.map(async (c) => {
+        const phone = c.phone
+        
+        // 该手艺人的所有订单（已接单或已完成的）
+        const { data: orders } = await db.collection('orders')
+          .where({
+            craftsmanPhone: phone,
+            status: _.in(['accepted', 'completed'])
+          })
+          .get()
+        
+        const totalOrders = orders.length
+        const completedOrders = orders.filter(o => o.status === 'completed').length
+        const ongoingOrders = orders.filter(o => o.status === 'accepted').length
+        
+        // 计算已完成订单金额
+        const totalAmount = orders
+          .filter(o => o.status === 'completed')
+          .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+        
+        // 计算评分（如果有评价系统）
+        const ratings = orders
+          .map(o => o.rating)
+          .filter(r => r && r > 0)
+        
+        const avgRating = ratings.length > 0 
+          ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+          : (c.rating || 0)
+        
+        return {
+          ...c,
+          stats: {
+            totalOrders,
+            completedOrders,
+            ongoingOrders,
+            totalAmount: totalAmount.toFixed(2),
+            avgRating: parseFloat(avgRating),
+            ratingCount: ratings.length
+          }
+        }
+      }))
+      
+      return success({ list: statsList, total, page, pageSize })
+    }
+    
+    case 'updateCraftsmanRating': {
+      const { id, rating, level, comment } = data
+      
+      if (!id) return error('缺少ID参数')
+      if (rating !== undefined && (rating < 0 || rating > 5)) {
+        return error('评分必须在0-5之间')
+      }
+      
+      const updateData = { updateTime: new Date() }
+      if (rating !== undefined) updateData.rating = parseFloat(rating)
+      if (level !== undefined) updateData.level = level
+      if (comment !== undefined) updateData.adminComment = comment
+      
+      await db.collection('craftsmen').doc(id).update({ data: updateData })
+      
+      return success(null, '评分更新成功')
+    }
+    
     default:
       return error('未知操作')
   }

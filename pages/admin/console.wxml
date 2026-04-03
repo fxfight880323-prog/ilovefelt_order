@@ -57,6 +57,23 @@
       </view>
     </view>
 
+    <!-- 统计分析 -->
+    <view class="quick-nav stats-nav">
+      <view class="section-title">📊 统计分析</view>
+      <view class="nav-grid">
+        <view class="nav-item" bindtap="goToDispatcherStats">
+          <view class="nav-icon stats-dispatcher">📈</view>
+          <view class="nav-text">派单人统计</view>
+          <view class="nav-desc">派单金额汇总</view>
+        </view>
+        <view class="nav-item" bindtap="goToCraftsmanStats">
+          <view class="nav-icon stats-craftsman">⭐</view>
+          <view class="nav-text">手艺人统计</view>
+          <view class="nav-desc">接单评分评级</view>
+        </view>
+      </view>
+    </view>
+
     <!-- 订单状态统计 -->
     <view class="order-stats-section">
       <view class="order-stat-row">

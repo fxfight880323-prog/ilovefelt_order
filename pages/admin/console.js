@@ -370,6 +370,16 @@ Page({
     wx.navigateTo({ url: '/pages/admin/orderList' })
   },
 
+  // 跳转到派单人统计
+  goToDispatcherStats() {
+    wx.navigateTo({ url: '/pages/admin/dispatcherStats' })
+  },
+
+  // 跳转到手艺人统计
+  goToCraftsmanStats() {
+    wx.navigateTo({ url: '/pages/admin/craftsmanStats' })
+  },
+
   // 刷新数据
   refresh() {
     this.loadData()
