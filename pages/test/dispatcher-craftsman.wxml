@@ -1,0 +1,72 @@
+<view class="container">
+  <view class="header">
+    <text class="title">派单人 & 手艺人功能测试</text>
+    <text class="subtitle">含注册/审批流程测试</text>
+  </view>
+
+  <view class="account-info">
+    <view class="account-section">
+      <view class="account-title">测试账号</view>
+      <view class="account-item">
+        <text class="account-role">派单人:</text>
+        <text class="account-detail">{{config.dispatcher.phone}} / {{config.dispatcher.password}}</text>
+      </view>
+      <view class="account-item">
+        <text class="account-role">手艺人:</text>
+        <text class="account-detail">{{config.craftsman.phone}} / {{config.craftsman.password}}</text>
+      </view>
+    </view>
+    <view class="account-section">
+      <view class="account-title">超级管理员</view>
+      <view class="account-item">
+        <text class="account-role">审批账号:</text>
+        <text class="account-detail">{{config.superAdmin.phone}} / {{config.superAdmin.password}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="test-controls">
+    <button class="run-btn {{isRunning ? 'running' : ''}}" bindtap="runTest" disabled="{{isRunning}}">
+      {{isRunning ? '测试中...' : '运行完整测试'}}
+    </button>
+    <button class="copy-btn" bindtap="copyLogs" disabled="{{logs.length === 0}}">复制日志</button>
+    <button class="back-btn" bindtap="goBack">返回</button>
+  </view>
+
+  <!-- 测试总结 -->
+  <view class="summary" wx:if="{{summary}}">
+    <view class="summary-item {{summary.failed > 0 ? 'has-fail' : ''}}">
+      <text class="summary-label">测试结果</text>
+      <text class="summary-value">
+        {{summary.passed}}/{{summary.total}} 通过
+        <text wx:if="{{summary.failed > 0}}" class="fail-count">({{summary.failed}} 失败)</text>
+      </text>
+    </view>
+  </view>
+
+  <!-- 测试结果列表 -->
+  <view class="results" wx:if="{{results.length > 0}}">
+    <view class="section-title">测试结果详情</view>
+    <view 
+      class="result-item {{item.success ? 'success' : 'fail'}}" 
+      wx:for="{{results}}" 
+      wx:key="index"
+    >
+      <view class="result-header">
+        <text class="result-icon">{{item.success ? '✅' : '❌'}}</text>
+        <text class="result-phase">[{{item.phase}}]</text>
+        <text class="result-name">{{item.testName}}</text>
+      </view>
+      <text class="result-message" wx:if="{{item.message}}">{{item.message}}</text>
+      <text class="result-time">{{item.time}}</text>
+    </view>
+  </view>
+
+  <!-- 日志输出 -->
+  <view class="logs" wx:if="{{logs.length > 0}}">
+    <view class="section-title">运行日志</view>
+    <scroll-view class="log-scroll" scroll-y>
+      <view class="log-item" wx:for="{{logs}}" wx:key="index">{{item}}</view>
+    </scroll-view>
+  </view>
+</view>

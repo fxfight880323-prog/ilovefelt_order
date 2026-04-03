@@ -1,0 +1,239 @@
+.container {
+  padding: 30rpx;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  background: linear-gradient(135deg, #6c5842 0%, #8b7355 100%);
+  border-radius: 20rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.account-info {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.account-section {
+  margin-bottom: 20rpx;
+}
+
+.account-section:last-child {
+  margin-bottom: 0;
+}
+
+.account-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #6c5842;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.account-role {
+  font-size: 26rpx;
+  color: #666;
+  width: 140rpx;
+}
+
+.account-detail {
+  font-size: 26rpx;
+  color: #333;
+  font-family: 'Consolas', 'Monaco', monospace;
+  background: #f5f5f5;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.test-controls {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.test-controls button {
+  flex: 1;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  border: none;
+}
+
+.run-btn {
+  background: linear-gradient(135deg, #07c160 0%, #05a050 100%);
+  color: #fff;
+}
+
+.run-btn.running {
+  background: #999;
+}
+
+.copy-btn {
+  background: #4a90d9;
+  color: #fff;
+}
+
+.back-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.summary {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 32rpx;
+  color: #07c160;
+  font-weight: bold;
+}
+
+.summary-item.has-fail .summary-value {
+  color: #e64340;
+}
+
+.fail-count {
+  color: #e64340;
+  margin-left: 10rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 10rpx;
+  border-left: 6rpx solid #6c5842;
+}
+
+.results {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.result-item {
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  border-radius: 12rpx;
+  background: #f9f9f9;
+  border-left: 6rpx solid #ddd;
+}
+
+.result-item.success {
+  border-left-color: #07c160;
+  background: rgba(7, 193, 96, 0.05);
+}
+
+.result-item.fail {
+  border-left-color: #e64340;
+  background: rgba(230, 67, 64, 0.05);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.result-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.result-phase {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 12rpx;
+}
+
+.result-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.result-message {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-left: 44rpx;
+  margin-top: 8rpx;
+}
+
+.result-time {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  margin-left: 44rpx;
+  margin-top: 4rpx;
+}
+
+.logs {
+  background: #1e1e1e;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.logs .section-title {
+  color: #fff;
+  border-left-color: #4ec9b0;
+}
+
+.log-scroll {
+  max-height: 600rpx;
+}
+
+.log-item {
+  font-size: 24rpx;
+  color: #d4d4d4;
+  font-family: 'Consolas', 'Monaco', monospace;
+  line-height: 1.6;
+  padding: 4rpx 0;
+  border-bottom: 1rpx solid #333;
+}

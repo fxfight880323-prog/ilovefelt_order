@@ -75,6 +75,42 @@
     </view>
   </view>
 
+  <!-- 绑定手机号弹窗 -->
+  <view class="bind-modal" wx:if="{{showBindPhone}}">
+    <view class="bind-modal-mask" bindtap="closeBindModal"></view>
+    <view class="bind-modal-content">
+      <view class="bind-modal-title">绑定手机号</view>
+      <view class="bind-modal-desc">您的微信尚未绑定账号，请先绑定已有账号</view>
+      
+      <view class="bind-form">
+        <view class="bind-form-item">
+          <input 
+            type="number" 
+            placeholder="请输入手机号" 
+            value="{{bindPhone}}"
+            bindinput="onBindPhoneInput"
+            maxlength="11"
+            class="bind-input"
+          />
+        </view>
+        <view class="bind-form-item">
+          <input 
+            type="password" 
+            placeholder="请输入密码" 
+            value="{{bindPassword}}"
+            bindinput="onBindPasswordInput"
+            class="bind-input"
+          />
+        </view>
+      </view>
+
+      <view class="bind-modal-buttons">
+        <button class="bind-btn cancel" bindtap="closeBindModal">取消</button>
+        <button class="bind-btn confirm" bindtap="onBindPhone">立即绑定</button>
+      </view>
+    </view>
+  </view>
+
   <!-- 协议提示 -->
   <view class="protocol-container" wx:if="{{showLogin}}">
     <view class="protocol-wrapper">

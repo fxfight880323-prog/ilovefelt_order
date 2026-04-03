@@ -31,7 +31,8 @@
     "pages/craftsman/orderList",
     "pages/craftsman/orderDetail",
     "pages/craftsman/profile",
-    "pages/craftsman/myOrders"
+    "pages/craftsman/myOrders",
+    "pages/test/dispatcher-craftsman"
   ],
   "window": {
     "backgroundTextStyle": "dark",

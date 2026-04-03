@@ -10,7 +10,10 @@ Page({
     agreeProtocol: false,
     loginMode: 'wechat',
     phone: '',
-    password: ''
+    password: '',
+    showBindPhone: false,
+    bindPhone: '',
+    bindPassword: ''
   },
 
   onLoad(options) {
@@ -202,30 +205,134 @@ Page({
     })
   },
 
-  // 微信登录
+  // 微信一键登录
   async onWechatLogin() {
     if (!this.data.agreeProtocol) {
       wx.showToast({ title: '请先同意用户协议', icon: 'none' })
       return
     }
 
-    this.setData({ isLoading: true, loadingText: '登录中...' })
+    this.setData({ isLoading: true, loadingText: '微信登录中...' })
 
     try {
-      // 微信登录凭证
-      const loginRes = await wx.login()
-      console.log('微信登录凭证:', loginRes.code)
+      // 调用微信登录API
+      const res = await API.auth.wechatLogin()
+      console.log('微信登录结果:', res)
 
-      // TODO: 如果需要微信登录，需要先在API中添加 wechatLogin 方法
-      // 目前使用手机号登录
-      this.setData({ isLoading: false, showLogin: true })
-      wx.showToast({ title: '请使用手机号登录', icon: 'none' })
-      
+      if (res.success) {
+        if (res.data.bound) {
+          // 已绑定，直接登录
+          const { phone, name, roles, currentRole, isSuperAdmin } = res.data
+          
+          app.globalData.isLoggedIn = true
+          app.globalData.isAdmin = isSuperAdmin || roles.includes('admin')
+          app.globalData.userRole = currentRole
+          app.globalData.userInfo = { name, phone }
+          
+          wx.setStorageSync('userRole', currentRole)
+          wx.setStorageSync('userInfo', { name, phone })
+          wx.removeStorageSync('logoutFlag')
+          
+          wx.showToast({
+            title: '登录成功',
+            icon: 'success',
+            success: () => {
+              setTimeout(() => {
+                this.navigateToHome(currentRole)
+              }, 1000)
+            }
+          })
+        } else {
+          // 未绑定，跳转到绑定页面
+          this.setData({ 
+            isLoading: false, 
+            showLogin: true,
+            showBindPhone: true // 显示绑定手机号弹窗
+          })
+          wx.showToast({ title: '请先绑定手机号', icon: 'none' })
+        }
+      } else {
+        this.setData({ isLoading: false, showLogin: true })
+        wx.showToast({ title: res.msg || '登录失败', icon: 'none' })
+      }
     } catch (err) {
-      console.error('登录失败:', err)
+      console.error('微信登录失败:', err)
       this.setData({ isLoading: false, showLogin: true })
       wx.showToast({ title: '登录失败，请重试', icon: 'none' })
     }
+  },
+
+  // 绑定手机号
+  async onBindPhone() {
+    const { bindPhone, bindPassword } = this.data
+
+    if (!bindPhone.trim()) {
+      wx.showToast({ title: '请输入手机号', icon: 'none' })
+      return
+    }
+    if (!/^1[3-9]\d{9}$/.test(bindPhone)) {
+      wx.showToast({ title: '手机号格式错误', icon: 'none' })
+      return
+    }
+    if (!bindPassword) {
+      wx.showToast({ title: '请输入密码', icon: 'none' })
+      return
+    }
+
+    this.setData({ isLoading: true })
+
+    try {
+      const res = await API.auth.bindPhone({
+        phone: bindPhone,
+        password: bindPassword
+      })
+
+      if (res.success) {
+        const { phone, name, roles, currentRole, isSuperAdmin } = res.data
+        
+        app.globalData.isLoggedIn = true
+        app.globalData.isAdmin = isSuperAdmin || roles.includes('admin')
+        app.globalData.userRole = currentRole
+        app.globalData.userInfo = { name, phone }
+        
+        wx.setStorageSync('userRole', currentRole)
+        wx.setStorageSync('userInfo', { name, phone })
+        wx.removeStorageSync('logoutFlag')
+        
+        wx.showToast({
+          title: '绑定成功',
+          icon: 'success',
+          success: () => {
+            setTimeout(() => {
+              this.setData({ showBindPhone: false })
+              this.navigateToHome(currentRole)
+            }, 1000)
+          }
+        })
+      } else {
+        this.setData({ isLoading: false })
+        wx.showToast({ title: res.msg || '绑定失败', icon: 'none' })
+      }
+    } catch (err) {
+      console.error('绑定失败:', err)
+      this.setData({ isLoading: false })
+      wx.showToast({ title: '绑定失败，请重试', icon: 'none' })
+    }
+  },
+
+  // 关闭绑定弹窗
+  closeBindModal() {
+    this.setData({ showBindPhone: false })
+  },
+
+  // 绑定手机号输入
+  onBindPhoneInput(e) {
+    this.setData({ bindPhone: e.detail.value })
+  },
+
+  // 绑定密码输入
+  onBindPasswordInput(e) {
+    this.setData({ bindPassword: e.detail.value })
   },
 
   // 切换登录模式

@@ -266,6 +266,115 @@ async function handleAuth(action, data, openid) {
       }, '登录成功')
     }
     
+    case 'wechatLogin': {
+      // 微信一键登录
+      try {
+        console.log('[WechatLogin] openid:', openid)
+        
+        if (!openid) {
+          return error('未获取到微信身份信息', -401)
+        }
+        
+        // 查找是否已有用户绑定此openid
+        const { data: users } = await db.collection('users').where({ openid }).get()
+        
+        if (users.length === 0) {
+          // 未绑定，返回需要绑定手机号
+          return success({ 
+            bound: false, 
+            openid 
+          }, '请先绑定手机号')
+        }
+        
+        const user = users[0]
+        
+        // 检查是否有活跃角色
+        const activeApps = user.roleApplications?.filter(app => app.status === 'active') || []
+        const currentRole = user.currentRole || (activeApps[0]?.role)
+        
+        if (!currentRole && !(user.roles?.includes('admin'))) {
+          return error('账号未审批', -1004)
+        }
+        
+        // 更新登录时间
+        await db.collection('users').doc(user._id).update({
+          data: { lastLoginTime: new Date() }
+        })
+        
+        return success({
+          bound: true,
+          phone: user.phone,
+          name: user.name,
+          roles: user.roles || [],
+          currentRole,
+          isSuperAdmin: user.phone === '13810062394' && user.roles?.includes('admin')
+        }, '微信登录成功')
+        
+      } catch (err) {
+        console.error('[WechatLogin] 错误:', err)
+        return error('微信登录失败: ' + err.message)
+      }
+    }
+    
+    case 'bindPhone': {
+      // 绑定手机号到微信
+      const { phone, password, code } = data
+      
+      if (!phone || !password) {
+        return error('请输入手机号和密码', -400)
+      }
+      
+      if (!openid) {
+        return error('未获取到微信身份信息', -401)
+      }
+      
+      try {
+        // 查找手机号对应的用户
+        const { data: users } = await db.collection('users').where({ phone }).get()
+        
+        if (users.length === 0) {
+          return error('手机号或密码错误', -1003)
+        }
+        
+        const user = users[0]
+        
+        // 验证密码
+        if (!verifyPassword(password, user.password)) {
+          return error('手机号或密码错误', -1003)
+        }
+        
+        // 检查是否已被其他微信绑定
+        if (user.openid && user.openid !== openid) {
+          return error('该手机号已绑定其他微信账号', -1005)
+        }
+        
+        // 绑定openid
+        await db.collection('users').doc(user._id).update({
+          data: { 
+            openid,
+            bindWechatTime: new Date(),
+            updateTime: new Date()
+          }
+        })
+        
+        // 检查是否有活跃角色
+        const activeApps = user.roleApplications?.filter(app => app.status === 'active') || []
+        const currentRole = user.currentRole || (activeApps[0]?.role)
+        
+        return success({
+          phone: user.phone,
+          name: user.name,
+          roles: user.roles || [],
+          currentRole,
+          isSuperAdmin: user.phone === '13810062394' && user.roles?.includes('admin')
+        }, '绑定成功')
+        
+      } catch (err) {
+        console.error('[BindPhone] 错误:', err)
+        return error('绑定失败: ' + err.message)
+      }
+    }
+    
     default:
       return error('未知操作')
   }

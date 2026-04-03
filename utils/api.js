@@ -47,11 +47,14 @@ const API = {
       return await API.call('auth', 'loginByPhone', { phone, password })
     },
 
-    // 微信一键登录（如果已实现）
+    // 微信一键登录
     async wechatLogin() {
-      // 先获取微信登录凭证
-      const loginRes = await wx.login()
-      return await API.call('auth', 'wechatLogin', { code: loginRes.code })
+      return await API.call('auth', 'wechatLogin')
+    },
+
+    // 绑定手机号到微信
+    async bindPhone(data) {
+      return await API.call('auth', 'bindPhone', data)
     }
   },
 
