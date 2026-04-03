@@ -551,117 +551,157 @@ async function handleAdmin(action, data, openid) {
     }
     
     case 'getDispatcherStats': {
-      // 获取所有派单人统计
-      const { page = 1, pageSize = 20 } = data
-      const skip = (page - 1) * pageSize
-      
-      const { data: dispatchers } = await db.collection('dispatchers')
-        .orderBy('createTime', 'desc')
-        .skip(skip)
-        .limit(pageSize)
-        .get()
-      
-      const { total } = await db.collection('dispatchers').count()
-      
-      // 统计每个派单人的订单情况
-      const statsList = await Promise.all(dispatchers.map(async (d) => {
-        const phone = d.phone
+      try {
+        // 获取所有派单人统计
+        const { page = 1, pageSize = 20 } = data
+        const skip = (page - 1) * pageSize
         
-        // 该派单人的所有订单
-        const { data: orders } = await db.collection('orders')
-          .where({ dispatcherPhone: phone })
+        console.log('[getDispatcherStats] 开始查询, page:', page, 'skip:', skip)
+        
+        const { data: dispatchers } = await db.collection('dispatchers')
+          .orderBy('createTime', 'desc')
+          .skip(skip)
+          .limit(pageSize)
           .get()
         
-        const totalOrders = orders.length
-        const pendingOrders = orders.filter(o => o.status === 'pending').length
-        const acceptedOrders = orders.filter(o => o.status === 'accepted').length
-        const completedOrders = orders.filter(o => o.status === 'completed').length
-        const cancelledOrders = orders.filter(o => o.status === 'cancelled').length
+        console.log('[getDispatcherStats] 查询到派单人:', dispatchers.length)
         
-        // 计算总金额（已完成的订单）
-        const totalAmount = orders
-          .filter(o => o.status === 'completed')
-          .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+        const { total } = await db.collection('dispatchers').count()
         
-        // 计算预估金额（所有非取消订单）
-        const estimatedAmount = orders
-          .filter(o => o.status !== 'cancelled')
-          .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
-        
-        return {
-          ...d,
-          stats: {
-            totalOrders,
-            pendingOrders,
+        // 统计每个派单人的订单情况
+        const statsList = await Promise.all(dispatchers.map(async (d) => {
+          try {
+            const phone = d.phone
+            
+            if (!phone) {
+              console.log('[getDispatcherStats] 派单人缺少手机号:', d._id)
+              return { ...d, stats: { totalOrders: 0, pendingOrders: 0, acceptedOrders: 0, completedOrders: 0, cancelledOrders: 0, totalAmount: 0, estimatedAmount: 0 } }
+            }
+            
+            // 该派单人的所有订单
+            const { data: orders } = await db.collection('orders')
+              .where({ dispatcherPhone: phone })
+              .get()
+            
+            const totalOrders = orders.length
+            const pendingOrders = orders.filter(o => o.status === 'pending').length
+            const acceptedOrders = orders.filter(o => o.status === 'accepted').length
+            const completedOrders = orders.filter(o => o.status === 'completed').length
+            const cancelledOrders = orders.filter(o => o.status === 'cancelled').length
+            
+            // 计算总金额（已完成的订单）
+            const totalAmount = orders
+              .filter(o => o.status === 'completed')
+              .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+            
+            // 计算预估金额（所有非取消订单）
+            const estimatedAmount = orders
+              .filter(o => o.status !== 'cancelled')
+              .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+            
+            return {
+              ...d,
+              stats: {
+                totalOrders,
+                pendingOrders,
             acceptedOrders,
             completedOrders,
             cancelledOrders,
             totalAmount: totalAmount.toFixed(2),
             estimatedAmount: estimatedAmount.toFixed(2)
+              }
+            }
+          } catch (err) {
+            console.error('[getDispatcherStats] 处理派单人出错:', d._id, err)
+            return { ...d, stats: { totalOrders: 0, pendingOrders: 0, acceptedOrders: 0, completedOrders: 0, cancelledOrders: 0, totalAmount: 0, estimatedAmount: 0 } }
           }
-        }
-      }))
-      
-      return success({ list: statsList, total, page, pageSize })
+        }))
+        
+        console.log('[getDispatcherStats] 返回数据:', statsList.length)
+        return success({ list: statsList, total, page, pageSize })
+      } catch (err) {
+        console.error('[getDispatcherStats] 出错:', err)
+        return error('获取派单人统计失败: ' + err.message)
+      }
     }
     
     case 'getCraftsmanStats': {
-      // 获取所有手艺人统计
-      const { page = 1, pageSize = 20 } = data
-      const skip = (page - 1) * pageSize
-      
-      const { data: craftsmen } = await db.collection('craftsmen')
-        .orderBy('createTime', 'desc')
-        .skip(skip)
-        .limit(pageSize)
-        .get()
-      
-      const { total } = await db.collection('craftsmen').count()
-      
-      // 统计每个手艺人的订单情况
-      const statsList = await Promise.all(craftsmen.map(async (c) => {
-        const phone = c.phone
+      try {
+        // 获取所有手艺人统计
+        const { page = 1, pageSize = 20 } = data
+        const skip = (page - 1) * pageSize
         
-        // 该手艺人的所有订单（已接单或已完成的）
-        const { data: orders } = await db.collection('orders')
-          .where({
-            craftsmanPhone: phone,
-            status: _.in(['accepted', 'completed'])
-          })
+        console.log('[getCraftsmanStats] 开始查询, page:', page)
+        
+        const { data: craftsmen } = await db.collection('craftsmen')
+          .orderBy('createTime', 'desc')
+          .skip(skip)
+          .limit(pageSize)
           .get()
         
-        const totalOrders = orders.length
-        const completedOrders = orders.filter(o => o.status === 'completed').length
-        const ongoingOrders = orders.filter(o => o.status === 'accepted').length
+        console.log('[getCraftsmanStats] 查询到手艺人:', craftsmen.length)
         
-        // 计算已完成订单金额
-        const totalAmount = orders
-          .filter(o => o.status === 'completed')
-          .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+        const { total } = await db.collection('craftsmen').count()
         
-        // 计算评分（如果有评价系统）
-        const ratings = orders
-          .map(o => o.rating)
-          .filter(r => r && r > 0)
-        
-        const avgRating = ratings.length > 0 
-          ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
-          : (c.rating || 0)
-        
-        return {
-          ...c,
-          stats: {
-            totalOrders,
-            completedOrders,
-            ongoingOrders,
-            totalAmount: totalAmount.toFixed(2),
-            avgRating: parseFloat(avgRating),
-            ratingCount: ratings.length
+        // 统计每个手艺人的订单情况
+        const statsList = await Promise.all(craftsmen.map(async (c) => {
+          try {
+            const phone = c.phone
+            
+            if (!phone) {
+              console.log('[getCraftsmanStats] 手艺人缺少手机号:', c._id)
+              return { ...c, stats: { totalOrders: 0, completedOrders: 0, ongoingOrders: 0, totalAmount: 0, avgRating: c.rating || 0, ratingCount: 0 } }
+            }
+            
+            // 该手艺人的所有订单（已接单或已完成的）
+            const { data: orders } = await db.collection('orders')
+              .where({
+                craftsmanPhone: phone,
+                status: _.in(['accepted', 'completed'])
+              })
+              .get()
+            
+            const totalOrders = orders.length
+            const completedOrders = orders.filter(o => o.status === 'completed').length
+            const ongoingOrders = orders.filter(o => o.status === 'accepted').length
+            
+            // 计算已完成订单金额
+            const totalAmount = orders
+              .filter(o => o.status === 'completed')
+              .reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+            
+            // 计算评分（如果有评价系统）
+            const ratings = orders
+              .map(o => o.rating)
+              .filter(r => r && r > 0)
+            
+            const avgRating = ratings.length > 0 
+              ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+              : (c.rating || 0)
+            
+            return {
+              ...c,
+              stats: {
+                totalOrders,
+                completedOrders,
+                ongoingOrders,
+                totalAmount: totalAmount.toFixed(2),
+                avgRating: parseFloat(avgRating),
+                ratingCount: ratings.length
+              }
+            }
+          } catch (err) {
+            console.error('[getCraftsmanStats] 处理手艺人出错:', c._id, err)
+            return { ...c, stats: { totalOrders: 0, completedOrders: 0, ongoingOrders: 0, totalAmount: 0, avgRating: c.rating || 0, ratingCount: 0 } }
           }
-        }
-      }))
-      
-      return success({ list: statsList, total, page, pageSize })
+        }))
+        
+        console.log('[getCraftsmanStats] 返回数据:', statsList.length)
+        return success({ list: statsList, total, page, pageSize })
+      } catch (err) {
+        console.error('[getCraftsmanStats] 出错:', err)
+        return error('获取手艺人统计失败: ' + err.message)
+      }
     }
     
     case 'updateCraftsmanRating': {

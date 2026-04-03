@@ -58,32 +58,79 @@ Page({
     this.setData({ isLoading: true })
 
     try {
-      const res = await API.call('admin', 'getDispatcherStats', {
-        page: this.data.page,
-        pageSize: this.data.pageSize
+      console.log('[DispatcherStats] 开始加载数据...')
+      
+      // 先尝试使用API
+      let list = []
+      let total = 0
+      
+      try {
+        const res = await API.call('admin', 'getDispatcherStats', {
+          page: this.data.page,
+          pageSize: this.data.pageSize
+        })
+        
+        if (res.success) {
+          list = res.data.list || []
+          total = res.data.total || 0
+        } else {
+          throw new Error(res.msg)
+        }
+      } catch (apiErr) {
+        console.log('[DispatcherStats] API调用失败，使用直接查询:', apiErr.message)
+        
+        // 备选：直接查询数据库
+        const db = wx.cloud.database()
+        const { data: dispatchers } = await db.collection('dispatchers')
+          .orderBy('createTime', 'desc')
+          .get()
+        
+        console.log('[DispatcherStats] 直接查询到:', dispatchers.length)
+        
+        // 统计每个派单人的订单
+        list = await Promise.all(dispatchers.map(async (d) => {
+          const { data: orders } = await db.collection('orders')
+            .where({ dispatcherPhone: d.phone })
+            .get()
+          
+          return {
+            ...d,
+            stats: {
+              totalOrders: orders.length,
+              pendingOrders: orders.filter(o => o.status === 'pending').length,
+              acceptedOrders: orders.filter(o => o.status === 'accepted').length,
+              completedOrders: orders.filter(o => o.status === 'completed').length,
+              cancelledOrders: orders.filter(o => o.status === 'cancelled').length,
+              totalAmount: orders.filter(o => o.status === 'completed')
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0).toFixed(2),
+              estimatedAmount: orders.filter(o => o.status !== 'cancelled')
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0).toFixed(2)
+            }
+          }
+        }))
+        
+        total = list.length
+      }
+      
+      // 排序
+      const { sortBy, sortOrder } = this.data
+      list.sort((a, b) => {
+        const aVal = parseFloat(a.stats?.[sortBy]) || 0
+        const bVal = parseFloat(b.stats?.[sortBy]) || 0
+        return sortOrder === 'desc' ? bVal - aVal : aVal - bVal
       })
 
-      if (res.success) {
-        // 排序
-        let sortedList = res.data.list
-        const { sortBy, sortOrder } = this.data
-        
-        sortedList.sort((a, b) => {
-          const aVal = parseFloat(a.stats[sortBy]) || 0
-          const bVal = parseFloat(b.stats[sortBy]) || 0
-          return sortOrder === 'desc' ? bVal - aVal : aVal - bVal
-        })
-
-        this.setData({
-          list: refresh ? sortedList : [...this.data.list, ...sortedList],
-          total: res.data.total,
-          hasMore: this.data.list.length + sortedList.length < res.data.total,
-          page: this.data.page + 1
-        })
-      }
+      this.setData({
+        list: refresh ? list : [...this.data.list, ...list],
+        total: total,
+        hasMore: false, // 直接查询一次性返回所有
+        page: this.data.page + 1
+      })
+      
+      console.log('[DispatcherStats] 加载成功:', list.length, '条数据')
     } catch (err) {
-      console.error('加载统计失败:', err)
-      wx.showToast({ title: '加载失败', icon: 'none' })
+      console.error('[DispatcherStats] 加载统计失败:', err)
+      wx.showToast({ title: '加载失败: ' + err.message, icon: 'none' })
     } finally {
       this.setData({ isLoading: false })
     }

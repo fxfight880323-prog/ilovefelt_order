@@ -64,38 +64,88 @@ Page({
     this.setData({ isLoading: true })
 
     try {
-      const res = await API.call('admin', 'getCraftsmanStats', {
-        page: this.data.page,
-        pageSize: this.data.pageSize
+      console.log('[CraftsmanStats] 开始加载数据...')
+      
+      // 先尝试使用API
+      let list = []
+      let total = 0
+      
+      try {
+        const res = await API.call('admin', 'getCraftsmanStats', {
+          page: this.data.page,
+          pageSize: this.data.pageSize
+        })
+        
+        if (res.success) {
+          list = res.data.list || []
+          total = res.data.total || 0
+        } else {
+          throw new Error(res.msg)
+        }
+      } catch (apiErr) {
+        console.log('[CraftsmanStats] API调用失败，使用直接查询:', apiErr.message)
+        
+        // 备选：直接查询数据库
+        const db = wx.cloud.database()
+        const { data: craftsmen } = await db.collection('craftsmen')
+          .orderBy('createTime', 'desc')
+          .get()
+        
+        console.log('[CraftsmanStats] 直接查询到:', craftsmen.length)
+        
+        // 统计每个手艺人的订单
+        list = await Promise.all(craftsmen.map(async (c) => {
+          const { data: orders } = await db.collection('orders')
+            .where({ 
+              craftsmanPhone: c.phone,
+              status: db.command.in(['accepted', 'completed'])
+            })
+            .get()
+          
+          const completedOrders = orders.filter(o => o.status === 'completed')
+          
+          return {
+            ...c,
+            stats: {
+              totalOrders: orders.length,
+              completedOrders: completedOrders.length,
+              ongoingOrders: orders.filter(o => o.status === 'accepted').length,
+              totalAmount: completedOrders
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0).toFixed(2),
+              avgRating: c.rating || 0,
+              ratingCount: 0
+            }
+          }
+        }))
+        
+        total = list.length
+      }
+      
+      // 排序
+      const { sortBy, sortOrder } = this.data
+      list.sort((a, b) => {
+        let aVal, bVal
+        if (sortBy === 'avgRating') {
+          aVal = a.stats?.avgRating || a.rating || 0
+          bVal = b.stats?.avgRating || b.rating || 0
+        } else {
+          aVal = parseFloat(a.stats?.[sortBy]) || 0
+          bVal = parseFloat(b.stats?.[sortBy]) || 0
+        }
+        return sortOrder === 'desc' ? bVal - aVal : aVal - bVal
       })
 
-      if (res.success) {
-        // 排序
-        let sortedList = res.data.list
-        const { sortBy, sortOrder } = this.data
-        
-        sortedList.sort((a, b) => {
-          let aVal, bVal
-          if (sortBy === 'avgRating') {
-            aVal = a.stats.avgRating || a.rating || 0
-            bVal = b.stats.avgRating || b.rating || 0
-          } else {
-            aVal = parseFloat(a.stats[sortBy]) || 0
-            bVal = parseFloat(b.stats[sortBy]) || 0
-          }
-          return sortOrder === 'desc' ? bVal - aVal : aVal - bVal
-        })
-
-        this.setData({
-          list: refresh ? sortedList : [...this.data.list, ...sortedList],
-          total: res.data.total,
-          hasMore: this.data.list.length + sortedList.length < res.data.total,
-          page: this.data.page + 1
-        })
-      }
+      this.setData({
+        list: refresh ? list : [...this.data.list, ...list],
+        total: total,
+        hasMore: false,
+        page: this.data.page + 1
+      })
+      
+      console.log('[CraftsmanStats] 加载成功:', list.length, '条数据')
     } catch (err) {
-      console.error('加载统计失败:', err)
-      wx.showToast({ title: '加载失败', icon: 'none' })
+      console.error('[CraftsmanStats] 加载统计失败:', err)
+      wx.showToast({ title: '加载失败: ' + err.message, icon: 'none' })
     } finally {
       this.setData({ isLoading: false })
     }
