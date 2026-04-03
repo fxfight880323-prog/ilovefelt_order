@@ -33,6 +33,24 @@ Page({
     }
   },
 
+  // 页面返回处理
+  onUnload() {
+    // 页面被关闭时（点击返回键），执行退出登录
+    console.log('控制台页面关闭，执行退出')
+    this.performLogout()
+  },
+
+  // 执行退出（不弹确认框）
+  performLogout() {
+    // 设置退出标记，防止自动登录
+    wx.setStorageSync('logoutFlag', true)
+    // 清除用户相关数据
+    wx.removeStorageSync('userRole')
+    wx.removeStorageSync('userInfo')
+    wx.removeStorageSync('adminInfo')
+    wx.removeStorageSync('isAdmin')
+  },
+
   // 验证超级管理员
   async checkAdmin() {
     try {

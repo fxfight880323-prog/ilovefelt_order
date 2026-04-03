@@ -1,4 +1,5 @@
 const app = getApp()
+const API = require('../../utils/api.js')
 
 Page({
   data: {
@@ -19,6 +20,15 @@ Page({
   },
 
   onLoad() {
+    // 检查是否是管理员，如果是则跳转到控制台
+    const userRole = wx.getStorageSync('userRole')
+    if (userRole === 'admin') {
+      console.log('欢迎页检测到管理员，跳转到控制台')
+      wx.redirectTo({
+        url: '/pages/admin/console'
+      })
+      return
+    }
     this.checkUserRole()
   },
 
@@ -44,47 +54,39 @@ Page({
   // 检查用户角色
   async checkUserRole() {
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'user',
-        data: { action: 'login' }
-      })
+      // 使用新的 API
+      const res = await API.auth.checkStatus()
       
-      if (res.result.code === 0) {
-        const { role, currentRole, roles, rolesInfo, isAdmin, status } = res.result.data
+      if (res.success && res.data.registered) {
+        const { role, roles, isSuperAdmin, isAdmin } = res.data
         
-        const activeRole = currentRole || role
+        // 如果是管理员，跳转到控制台
+        if (isSuperAdmin || isAdmin || roles?.includes('admin')) {
+          console.log('欢迎页检测到管理员角色，跳转到控制台')
+          wx.redirectTo({
+            url: '/pages/admin/console'
+          })
+          return
+        }
         
-        const currentRoleInfo = rolesInfo ? rolesInfo[activeRole] : null
+        const activeRole = role || (roles && roles[0]) || 'guest'
         
         this.setData({
-          userRole: role,
+          userRole: activeRole,
           currentRole: activeRole,
-          roles: roles || [role],
-          isAdmin,
-          roleInfo: currentRoleInfo
+          roles: roles || [activeRole],
+          isAdmin: isAdmin || isSuperAdmin || false
         })
         
         app.globalData.userRole = activeRole
-        app.globalData.roles = roles || [role]
-        app.globalData.roleInfo = currentRoleInfo
-        app.globalData.isAdmin = isAdmin
-        
-        // 兼容旧代码：设置 craftsmanInfo
-        if (rolesInfo && rolesInfo.craftsman) {
-          app.globalData.craftsmanInfo = rolesInfo.craftsman
-        }
+        app.globalData.roles = roles || [activeRole]
+        app.globalData.isAdmin = isAdmin || isSuperAdmin || false
 
         // 加载用户的可用角色
         this.loadUserRoles()
-
-        // 处理审核中状态
-        if (activeRole === 'craftsman' && status === 'pending') {
-          wx.showModal({
-            title: '审核中',
-            content: '您的手艺人注册申请正在审核中，请耐心等待审核通过后再操作',
-            showCancel: false
-          })
-        }
+      } else {
+        // 未登录，显示登录按钮
+        console.log('用户未登录')
       }
     } catch (err) {
       console.error('检查角色失败:', err)

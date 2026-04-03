@@ -90,21 +90,34 @@ Page({
       console.log('获取用户信息结果:', checkRes)
 
       if (checkRes.data.registered && checkRes.data.approved) {
-        const { roles, currentRole } = checkRes.data
-        const role = currentRole || roles[0]
+        const { roles, currentRole, isSuperAdmin } = checkRes.data
         
-        // 获取用户详细信息
-        const userRes = await API.user.getInfo()
-        const roleInfo = userRes.data.rolesInfo ? userRes.data.rolesInfo[role] : null
+        // 优先判断是否是管理员
+        if (isSuperAdmin || roles?.includes('admin')) {
+          console.log('自动登录: 检测到管理员')
+          app.globalData.userRole = 'admin'
+          app.globalData.isLoggedIn = true
+          app.globalData.isAdmin = true
+          wx.setStorageSync('userRole', 'admin')
+          
+          // 清除退出标记
+          wx.removeStorageSync('logoutFlag')
+          
+          this.setData({ loadingText: '正在进入管理后台...' })
+          setTimeout(() => {
+            this.navigateToHome('admin')
+          }, 500)
+          return
+        }
+        
+        const role = currentRole || roles[0]
         
         // 更新全局数据
         app.globalData.userRole = role
-        app.globalData.roleInfo = roleInfo
         app.globalData.isLoggedIn = true
-        app.globalData.isAdmin = roles.includes('admin')
+        app.globalData.isAdmin = false
         
         wx.setStorageSync('userRole', role)
-        wx.setStorageSync('userInfo', roleInfo || {})
         
         console.log('自动登录成功:', role)
         
@@ -162,14 +175,16 @@ Page({
     
     // 超级管理员跳转到管理后台
     if (role === 'admin') {
-      wx.navigateTo({
+      // 使用 redirectTo 避免页面栈问题
+      wx.redirectTo({
         url: '/pages/admin/console',
         success: () => {
           console.log('跳转到管理后台成功')
         },
         fail: (err) => {
           console.error('跳转失败:', err)
-          wx.switchTab({ url: '/pages/common/index' })
+          // 如果跳转失败，显示登录按钮
+          this.showLoginButtons()
         }
       })
       return
